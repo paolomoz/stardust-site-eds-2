@@ -61,6 +61,7 @@ function typewriter(pre, script, skipBtn) {
     } else {
       let k = 0;
       const type = () => {
+        if (skipped) return; // skip rebuilt the pre: a late keystroke must not add a line
         k += 1;
         span.textContent = text.slice(0, k);
         if (k < text.length) setTimeout(type, 14 + Math.random() * 40);
