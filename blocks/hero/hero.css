@@ -1,37 +1,403 @@
-.hero-container .hero-wrapper {
-  max-width: unset;
-  padding: 0;
-}
+/* hero: visual half (shader + lockup) over a light text half. Tokens only. */
 
 .hero {
   position: relative;
-  padding: 40px 24px;
-  min-height: 300px;
+  height: 100svh;
+  max-height: 1200px;
+  overflow: hidden;
+
+  /* share of the stage the shader keeps once the intro is done */
+  --top: 50%;
 }
 
-.hero h1 {
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-  color: var(--background-color);
+/*
+ * intro: one full-height shader panel, lockup collapsed; JS releases the states in sequence.
+ * Everything moves by transform (or grows from a fixed top edge) so the sequence causes no
+ * layout shift: the light half slides up over the shader, the lockup slot translates, the
+ * canvas shrinks from the bottom.
+ */
+.hero .hero-text {
+  overflow: hidden;
+  transition: transform 1.15s cubic-bezier(0.7, 0, 0.18, 1);
 }
 
-.hero picture {
+.hero.intro .hero-text {
+  transform: translateY(100%);
+}
+
+.hero .hero-slot {
   position: absolute;
-  z-index: -1;
+  inset: 0 0 calc(100% - var(--top));
+  transition: transform 1.15s cubic-bezier(0.7, 0, 0.18, 1);
+}
+
+.hero.intro .hero-slot {
+  transform: translateY(50%);
+}
+
+.hero .hero-lockup {
+  transition:
+    transform 1.25s var(--ease-out),
+    opacity 0.9s var(--ease-out);
+}
+
+.hero.intro-lockup .hero-lockup {
+  transform: translate3d(0, 0, 0) scale(0.001);
+}
+
+.hero .hero-word {
+  transition: opacity 1s var(--ease-out);
+}
+
+.hero.intro-lockup .hero-word {
+  opacity: 0;
+}
+
+.hero.intro-lockup .hero-mark[data-reveal] {
+  transition: none;
+}
+
+.hero.intro .top {
+  opacity: 0;
+}
+
+.hero .top {
+  transition: opacity 0.8s var(--ease-out) 0.3s;
+}
+
+.hero .hero-visual {
+  position: absolute;
   inset: 0;
-  object-fit: cover;
-  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--page);
+  perspective: 1200px;
 }
 
-.hero img {
-  object-fit: cover;
+.hero .hero-visual canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: calc(100% - var(--top));
   width: 100%;
-  height: 100%;
+  height: auto;
+  display: block;
+  transition: bottom 1.15s cubic-bezier(0.7, 0, 0.18, 1);
 }
 
-@media (width >= 900px) {
+.hero.intro .hero-visual canvas {
+  bottom: 0;
+}
+
+.hero .top {
+  position: absolute;
+  top: calc(var(--nav-h) + 22px);
+  left: var(--pad);
+  right: var(--pad);
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-55);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.hero .top .ver,
+.hero .top .ver p {
+  text-transform: none;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+  font-family: var(--mono);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text-55);
+  margin: 0;
+}
+
+.hero .hero-lockup {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 3.5vw, 56px);
+  padding-top: calc(var(--nav-h) * 0.5);
+  pointer-events: none;
+  transform: translate3d(calc(var(--px) * -14px), calc(var(--py) * -10px), 0) scale(1);
+  will-change: transform;
+}
+
+.hero .hero-mark {
+  display: block;
+  width: clamp(96px, min(28vh, 15vw), 280px);
+  height: auto;
+  border-radius: 0;
+  box-shadow: none;
+  transform: rotateY(calc(var(--px) * 9deg)) rotateX(calc(var(--py) * -9deg)) translate3d(calc(var(--px) * -10px), calc(var(--py) * -8px), 0);
+  transform-style: preserve-3d;
+  will-change: transform;
+  filter: blur(calc(var(--energy) * 5px)) saturate(calc(1 + var(--energy) * 0.8)) drop-shadow(0 0 calc(18px + var(--energy) * 60px) color-mix(in srgb, var(--coral) calc(25% + var(--energy) * 45%), transparent)) drop-shadow(0 20px 40px rgb(0 0 0 / 45%));
+}
+
+.hero .hero-mark[data-reveal] {
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+}
+
+.hero .hero-mark[data-reveal]:not(.in) {
+  opacity: 0;
+  transform: scale(0.92) translateY(14px);
+}
+
+.hero .hero-word {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(60px, min(21vh, 11vw), 220px);
+  letter-spacing: -0.05em;
+  line-height: 0.88;
+  color: var(--text);
+  transform: translate3d(calc(var(--px) * -26px), calc(var(--py) * -16px), 0);
+  will-change: transform, filter;
+  filter: blur(calc(var(--energy) * 7px));
+  text-shadow:
+    0 0 calc(var(--energy) * 60px) color-mix(in srgb, var(--gold) calc(var(--energy) * 90%), transparent),
+    0 20px 60px color-mix(in srgb, var(--page) 60%, transparent);
+  mix-blend-mode: screen;
+}
+
+.hero .hero-word .line {
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+/* light half */
+.hero .hero-text {
+  position: absolute;
+  inset: var(--top) 0 0;
+  background: var(--text);
+  color: var(--navy);
+  display: grid;
+  align-items: end;
+}
+
+.hero .hero-text .bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 40px;
+  padding: 40px var(--pad) 44px;
+}
+
+.hero .kicker p {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(16px, 1.3vw, 20px);
+  color: color-mix(in srgb, var(--navy) 72%, transparent);
+  max-width: 34ch;
+  line-height: 1.35;
+  margin: 0 0 14px;
+}
+
+/* "Or all three." gets a gold marker drawn in after the kicker */
+.hero .kicker em {
+  font-style: normal;
+  color: var(--navy);
+  background: linear-gradient(var(--gold), var(--gold)) no-repeat 0 0 / 0% 100%;
+  padding: 0 0.08em;
+  margin: 0 -0.08em;
+  border-radius: 2px;
+  transition: background-size 0.9s var(--ease-out) 1.4s;
+}
+
+.hero .kicker .in em {
+  background-size: 100% 100%;
+}
+
+.hero .seed-line p {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  color: color-mix(in srgb, var(--navy) 50%, transparent);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+  max-width: none;
+  line-height: 1.55;
+}
+
+.hero .seed-line strong {
+  font-weight: 500;
+}
+
+.hero .seed-line .hash {
+  color: var(--navy);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.hero .title {
+  /* the wrapper only carries type + alignment; the h1 itself is the grid item, as in the
+     prototype (a block wrapper would let the last line's negative margin collapse through) */
+  display: contents;
+  text-align: right;
+}
+
+.hero .title h1 {
+  font-size: inherit;
+  line-height: 0.95;
+  letter-spacing: inherit;
+  color: var(--navy);
+  margin: 0;
+}
+
+.hero .title .line {
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+
+.hero .title .accent {
+  color: var(--coral);
+}
+
+.hero .scroll {
+  position: absolute;
+  left: 50%;
+  bottom: 46px;
+  transform: translateX(-50%);
+}
+
+.hero .scroll[data-reveal] {
+  transform: translateX(-50%);
+}
+
+.hero .scroll p {
+  margin: 0;
+  max-width: none;
+}
+
+.hero .scroll a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: color-mix(in srgb, var(--navy) 55%, transparent);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero .scroll .arrow {
+  display: inline-block;
+  animation: nudge 1.8s var(--ease-in-out) infinite;
+}
+
+@keyframes nudge {
+  0%,
+  100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* scroll-linked exit of the lockup (progressive enhancement) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero .hero-lockup,
+    .hero .top {
+      animation: hero-out linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 60vh;
+    }
+
+    @keyframes hero-out {
+      to {
+        translate: 0 -12vh;
+        opacity: 0;
+      }
+    }
+  }
+}
+
+@media (width <= 900px) {
   .hero {
-    padding: 40px 32px;
+    height: 100svh;
+    max-height: none;
+    scroll-snap-align: start;
+
+    --top: 46%;
+  }
+
+  .hero.intro .hero-slot {
+    transform: translateY(58.7%);
+  }
+
+  .hero .hero-text .bottom {
+    padding: 24px var(--pad) 28px;
+  }
+
+  .hero .top .ver,
+  .hero .top .ver p {
+    font-size: 11px;
+  }
+}
+
+@media (width <= 640px) {
+  .hero .top {
+    display: none;
+  }
+
+  .hero .hero-lockup {
+    flex-direction: column;
+    gap: 14px;
+    padding-top: var(--nav-h);
+  }
+
+  .hero .hero-mark {
+    width: clamp(84px, 15vh, 140px);
+  }
+
+  .hero .hero-word {
+    font-size: clamp(40px, 7.5vh, 64px);
+  }
+
+  .hero .hero-text .bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .hero .title {
+    text-align: left;
+    font-size: clamp(48px, 15vw, 64px);
+  }
+
+  .hero .scroll {
+    display: none;
+  }
+
+  .hero .kicker p {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero.intro .hero-text,
+  .hero.intro .hero-slot {
+    transform: none;
+  }
+
+  .hero.intro .hero-visual canvas {
+    bottom: calc(100% - var(--top));
+  }
+
+  .hero.intro-lockup .hero-lockup {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .hero.intro-lockup .hero-word {
+    opacity: 1;
+  }
+
+  .hero.intro .top {
+    opacity: 1;
   }
 }

@@ -1,0 +1,98 @@
+/*
+ * Cube palettes — one rule per cube face, see scripts/cube.js
+ *
+ * Chosen 2026-09-11 from palette-tests/cube-faces-2. `front` is the site's P10 palette and
+ * has no rule. Rules set custom properties only.
+ *
+ *   front   P10 ink        #060a14 page, navy tiles, gold signal, coral seed   (default)
+ *   right   Espresso       #1e120c page, sky-blue signal, neon coral seed
+ *   left    Sunbeam ink    #030b1a page, FFC300 signal, light gold seed
+ *   top     Bottle         #062a1e page, acid yellow signal, hot pink seed
+ *   bottom  Tangerine      #e8622c page, pale gold signal, purple seed, plum type
+ *   back    Aubergine      #2a0a3a page, lime signal, cyan seed, only seen inside the puzzle
+ */
+
+.cube-face {
+  background: var(--page);
+  color: var(--text);
+}
+
+/* Espresso · sky · coral */
+[data-cube-face="right"] {
+  --page: #1e120c;
+  --navy: #3f2619;
+  --glow: #60524f;
+  --gold: #7ec8ff;
+  --coral: #ff5a3c;
+  --text: #f4ede4;
+  --text-72: rgb(244 237 228 / 72%);
+  --text-55: rgb(244 237 228 / 55%);
+  --text-40: rgb(244 237 228 / 40%);
+  --text-15: rgb(244 237 228 / 15%);
+  --text-08: rgb(244 237 228 / 8%);
+  --gold-tint: #bfdcf0;
+}
+
+/* Sunbeam ink */
+[data-cube-face="left"] {
+  --page: #030b1a;
+  --navy: #071d3a;
+  --glow: #143561;
+  --gold: #ffc300;
+  --coral: #f8d84e;
+  --text: #f7f3e8;
+  --text-72: rgb(247 243 232 / 72%);
+  --text-55: rgb(247 243 232 / 55%);
+  --text-40: rgb(247 243 232 / 40%);
+  --text-15: rgb(247 243 232 / 15%);
+  --text-08: rgb(247 243 232 / 8%);
+  --gold-tint: #ffe9a6;
+}
+
+/* Bottle · acid · pink */
+[data-cube-face="top"] {
+  --page: #062a1e;
+  --navy: #0c523b;
+  --glow: #388d4d;
+  --gold: #d9ff3d;
+  --coral: #ff3ea5;
+  --text: #f3f6e8;
+  --text-72: rgb(243 246 232 / 72%);
+  --text-55: rgb(243 246 232 / 55%);
+  --text-40: rgb(243 246 232 / 40%);
+  --text-15: rgb(243 246 232 / 15%);
+  --text-08: rgb(243 246 232 / 8%);
+  --gold-tint: #e7fa9b;
+}
+
+/* Tangerine */
+[data-cube-face="bottom"] {
+  --page: #e8622c;
+  --navy: #e8306e;
+  --glow: #f5c242;
+  --gold: #fde7a8;
+  --coral: #7b3ae0;
+  --text: #23104f;
+  --text-72: rgb(35 16 79 / 72%);
+  --text-55: rgb(35 16 79 / 55%);
+  --text-40: rgb(35 16 79 / 40%);
+  --text-15: rgb(35 16 79 / 15%);
+  --text-08: rgb(35 16 79 / 8%);
+  --gold-tint: #fdf1c8;
+}
+
+/* Aubergine · lime · cyan — puzzle only */
+[data-cube-face="back"] {
+  --page: #2a0a3a;
+  --navy: #461161;
+  --glow: #6e4572;
+  --gold: #b8ff3c;
+  --coral: #3ee6ff;
+  --text: #f6effb;
+  --text-72: rgb(246 239 251 / 72%);
+  --text-55: rgb(246 239 251 / 55%);
+  --text-40: rgb(246 239 251 / 40%);
+  --text-15: rgb(246 239 251 / 15%);
+  --text-08: rgb(246 239 251 / 8%);
+  --gold-tint: #daf6a5;
+}

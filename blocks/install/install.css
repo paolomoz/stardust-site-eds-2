@@ -1,0 +1,217 @@
+/* install — the coral stage, content inked in navy (the one place coral is a field) */
+.install {
+  position: relative;
+  background: var(--coral);
+  color: var(--navy);
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+
+  /* the prototype's section.tight (0,1,1) out-ranks .install: 7vw wins over nav-h + 40px */
+  padding-top: clamp(64px, 7vw, 112px);
+  padding-bottom: 40px;
+}
+
+.install .container {
+  width: 100%;
+}
+
+.install .two {
+  align-items: center;
+}
+
+.install h2 {
+  color: var(--navy);
+}
+
+.install p {
+  color: color-mix(in srgb, var(--navy) 78%, transparent);
+}
+
+.install .two > div > p[data-reveal] {
+  margin-top: 20px;
+}
+
+.install .actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.install a.button {
+  border-color: color-mix(in srgb, var(--navy) 35%, transparent);
+  color: var(--navy);
+}
+
+.install a.button.secondary:hover {
+  border-color: var(--navy);
+}
+
+.install a.button.primary {
+  background: var(--navy);
+  color: var(--text);
+  border-color: var(--navy);
+}
+
+.install a.button.primary::after {
+  background: var(--gold);
+}
+
+.install a.button.primary:hover {
+  color: var(--navy);
+}
+
+.install .credit {
+  margin-top: 22px;
+}
+
+.install .credit p {
+  color: color-mix(in srgb, var(--navy) 65%, transparent);
+  font-size: 14px;
+  margin: 0;
+}
+
+.install .credit a {
+  color: var(--navy);
+  border-bottom: 1px solid color-mix(in srgb, var(--navy) 45%, transparent);
+}
+
+.install .aside-quote {
+  border-color: var(--navy);
+}
+
+.install .aside-quote p {
+  color: var(--navy);
+}
+
+.install .aside-quote p + p {
+  color: color-mix(in srgb, var(--navy) 60%, transparent);
+}
+
+.install ::selection {
+  background: var(--navy);
+  color: var(--coral);
+}
+
+/* terminal */
+.install .terminal {
+  background: var(--navy);
+  border: 1px solid color-mix(in srgb, var(--navy) 30%, transparent);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 40px 90px color-mix(in srgb, var(--navy) 40%, transparent);
+}
+
+.install .terminal .bar {
+  position: relative;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--text-08);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-40);
+}
+
+.install .terminal .bar i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-15);
+}
+
+.install .terminal .bar span {
+  margin-left: auto;
+}
+
+.install .terminal .skip {
+  margin-left: 12px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-55);
+  padding: 3px 8px;
+  border: 1px solid var(--text-15);
+  border-radius: 2px;
+}
+
+.install .terminal .skip:hover {
+  color: var(--text);
+  border-color: var(--text-40);
+}
+
+.install .terminal pre {
+  margin: 0;
+  padding: 24px 22px 26px;
+  font: 13.5px/1.9 var(--mono);
+  color: var(--gold-tint);
+  white-space: pre-wrap;
+  min-height: 330px;
+}
+
+.install .terminal .p {
+  color: var(--text-40);
+}
+
+.install .terminal .c {
+  color: var(--gold);
+}
+
+.install .terminal .d {
+  color: var(--text-55);
+}
+
+.install .terminal .cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  background: var(--gold);
+  vertical-align: -0.2em;
+  animation: install-blink 1s steps(2) infinite;
+}
+
+@keyframes install-blink {
+  50% { opacity: 0; }
+}
+
+@media (width <= 1024px) {
+  .install .two {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (width <= 900px) {
+  .install {
+    scroll-snap-align: start;
+  }
+
+  .install .two {
+    gap: 24px;
+  }
+
+  .install .terminal pre {
+    min-height: 0;
+    font-size: 12px;
+    padding: 16px;
+  }
+
+  .install .aside-quote.small {
+    margin-top: 20px;
+  }
+}
+
+/* the attribution stays mono under the .small variant (specificity of .aside-quote.small p) */
+.install .aside-quote.small p + p {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+  margin: 0;
+  color: color-mix(in srgb, var(--navy) 60%, transparent);
+}

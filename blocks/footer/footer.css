@@ -1,20 +1,189 @@
-footer {
-  background-color: var(--light-color);
-  font-size: var(--body-font-size-xs);
+/* footer — full viewport, the wordmark fills the width */
+footer .footer {
+  border-top: 1px solid var(--text-08);
+  min-height: 100svh;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  background: var(--page);
+  color: var(--text);
 }
 
-footer .footer > div {
-  margin: auto;
-  max-width: 1200px;
-  padding: 40px 24px 24px;
+footer .footer .container {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding-top: calc(var(--nav-h) + 40px);
+  padding-bottom: 36px;
+  width: 100%;
 }
 
-footer .footer p {
+footer .footer .meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-55);
+  line-height: 1.8;
+}
+
+footer .footer .meta.top {
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--text-08);
+}
+
+footer .footer .meta ul {
+  list-style: none;
   margin: 0;
+  padding: 0;
 }
 
-@media (width >= 900px) {
-  footer .footer > div {
-    padding: 40px 32px 24px;
+footer .footer .meta li,
+footer .footer .meta p {
+  display: block;
+  margin: 0;
+  color: inherit;
+  max-width: none;
+}
+
+footer .footer .meta a {
+  color: var(--text-72);
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+}
+
+footer .footer .meta a:hover {
+  color: var(--text);
+}
+
+footer .footer .meta .right {
+  text-align: right;
+}
+
+footer .footer .meta .hash {
+  display: block;
+  color: var(--gold);
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+footer .footer .foot-bottom {
+  align-self: end;
+}
+
+footer .footer .foot-line {
+  font-family: var(--display);
+  font-size: clamp(18px, 1.6vw, 26px);
+  color: var(--text-55);
+  margin: 0 0 8px 4px;
+  letter-spacing: -0.01em;
+  max-width: none;
+}
+
+footer .footer .big {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(96px, 24.6vw, 480px);
+  line-height: 0.92;
+  letter-spacing: -0.06em;
+  user-select: none;
+  margin-left: -0.04em;
+  margin-bottom: -0.08em;
+}
+
+footer .footer .big p {
+  margin: 0;
+  max-width: none;
+  color: var(--text);
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+footer .footer .big strong {
+  display: flex;
+  font-weight: inherit;
+}
+
+footer .footer .big span {
+  display: inline-block;
+  transition:
+    transform 0.7s var(--ease-out),
+    color 0.7s var(--ease-out);
+}
+
+footer .footer .big:hover span {
+  color: var(--gold);
+}
+
+footer .footer .big span:hover {
+  transform: translateY(-6%);
+  color: var(--coral) !important;
+}
+
+footer .footer .foot-meta {
+  margin: 26px 0 0;
+  color: var(--text-55);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+footer .footer .foot-meta p {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  max-width: none;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    footer .footer .big {
+      animation: footer-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+
+    @keyframes footer-rise {
+      from {
+        transform: translateY(30%);
+        opacity: 0.2;
+      }
+
+      to {
+        transform: none;
+        opacity: 1;
+      }
+    }
   }
 }
+
+@media (width <= 900px) {
+  footer .footer {
+    scroll-snap-align: start;
+    min-height: 100svh;
+  }
+
+  footer .footer .container {
+    padding-top: calc(var(--nav-h) + 24px);
+  }
+
+  footer .footer .meta {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  footer .footer .meta .right {
+    text-align: left;
+  }
+
+  footer .footer .big {
+    font-size: 22vw;
+  }
+}
+
+/* the prototype's ≤640 footer rules (1 column, 21vw) are out-ranked by its later ≤900 rules
+   (2 columns, 22vw), so the rendered phone footer keeps the ≤900 values */

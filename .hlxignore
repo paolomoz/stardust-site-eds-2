@@ -5,3 +5,7 @@ LICENSE
 package.json
 package-lock.json
 test/*
+content/*
+stardust/*
+qa/*
+*.py

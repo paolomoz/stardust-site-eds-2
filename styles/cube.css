@@ -1,0 +1,56 @@
+/*
+ * Cube layer — see scripts/cube.js
+ *
+ * Stage styles and tuning knobs. Palettes live in cube-palettes.css, triggers in cube-ui.css.
+ */
+
+:root {
+  --cube-duration: 900ms;
+  --cube-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* fraction of the cube depth the camera pulls back at mid turn */
+  --cube-pullback: 0.3;
+
+  /* perspective distance as a multiple of the longer viewport side */
+  --cube-perspective: 1.6;
+
+  /* what shows around the cube while it turns */
+  --cube-void: #000;
+}
+
+/* palette switches are instant: no transition may bridge two faces */
+html.cube-switching,
+html.cube-switching * {
+  transition: none !important;
+}
+
+/* stage */
+
+.cube-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  overflow: hidden;
+  background: var(--cube-void);
+}
+
+.cube {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* `.cube-face` alone is a surface painted with a palette (see cube-palettes.css);
+   inside the stage it is a viewport-sized snapshot of the page */
+.cube > .cube-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+
+.cube-face-page {
+  position: relative;
+  width: 100%;
+}

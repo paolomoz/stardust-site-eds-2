@@ -1,0 +1,11 @@
+{
+  "runtime": "vanilla-eds",
+  "blockWrapperClass": "block",
+  "buttonClasses": ".button / .button.primary / .button.secondary / .button.accent, in p.button-wrapper",
+  "buttonization": "formatted-only",
+  "fragmentScriptPolicy": "inert-innerHTML",
+  "emptySectionCollapse": true,
+  "sectionMetadata": "server-side only (aem.js decorateSections in this clone does not read section-metadata)",
+  "wrapTextNodes": true,
+  "verifiedAgainst": "scripts/scripts.js decorateButtons + scripts/aem.js decorateBlock, 2026-09-11"
+}

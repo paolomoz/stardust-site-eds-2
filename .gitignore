@@ -11,3 +11,8 @@ helix-importer-ui
 # Ensure these files are tracked
 !CLAUDE.md
 !AGENTS.md
+.env
+.env.*
+qa/
+stardust/eds-schema/
+content/.deploy-ledger.json
