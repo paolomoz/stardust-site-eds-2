@@ -15,10 +15,8 @@
  *   - Widget: a small live cube in the corner mirrors the orientation. Drag it, click an
  *     arrow, or focus it and use the arrow keys. Arrows and keys use "look" semantics: the
  *     right arrow shows the face on the right.
- *   - Reveal: once per session, two seconds after the top screen shows, the page pulls back
- *     into a cube that shrinks to half the page and floats, rocking gently on both axes with
- *     the turn arrows blinking around it. Drag it or click an arrow to turn; it grows back
- *     into the page. Then the corner widget fades in, floating with the same blinking arrows.
+ *     The widget fades in once the page has loaded and is the cube's discoverability element:
+ *     the site opens straight into the page, nothing interrupts the first screen.
  *
  * Alt + arrow keys turn as well, with the same look semantics.
  */
@@ -35,12 +33,6 @@
   const WIDGET_TURN_PX = 140; // widget drag for a full turn
   const PRESS_TILT = 4; // degrees of tilt toward the pointer while pressing
   const PRESS_PULL = 0.03; // camera pull-back while pressing, fraction of depth
-  const INTRO_DELAY = 2000; // ms after load before the reveal
-  const INTRO_SHRINK = 1400; // ms the page takes to shrink into the floating cube
-  const INTRO_STAY = 9000; // ms the cube floats before growing back by itself
-  const INTRO_SCALE = 0.5; // apparent size of the floating cube
-  const FLOAT_X = 4; // degrees of gentle rocking up and down
-  const FLOAT_Y = 6; // degrees of gentle rocking left and right
 
   const INTERACTIVE = 'a, button, input, textarea, select, label, summary, [contenteditable], [data-cube-exclude]';
   // arrow pointing at a side shows the face on that side, i.e. content moves the other way
@@ -62,7 +54,6 @@
     bottom: 'rotateX(-90deg)',
   };
 
-  const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const el = (tag, className) => {
     const node = document.createElement(tag);
     node.className = className;
@@ -322,115 +313,6 @@
     });
   }
 
-  /* ---------------------------------------------------------------- reveal */
-
-  const seen = (key) => {
-    try {
-      return Boolean(sessionStorage.getItem(key));
-    } catch (err) {
-      return false;
-    }
-  };
-  const remember = (key) => {
-    try {
-      sessionStorage.setItem(key, '1');
-    } catch (err) {
-      // no storage
-    }
-  };
-
-  /**
-   * The page pulls back into a cube that shrinks to half the page and floats, rocking gently,
-   * with the turn arrows blinking around it. Resolves when the page is back, after a turn
-   * (drag, arrow or arrow key), a click on the void, any other key, or INTRO_STAY.
-   */
-  async function reveal() {
-    if (reduceMotion() || cube.isBusy()) return;
-    const s = await cube.begin();
-    if (!s) return;
-    const pull = Math.max(s.width, s.height) * cube.settings().perspective * (1 / INTRO_SCALE - 1);
-    const overlay = document.querySelector('.cube-overlay');
-
-    const ui = el('div', 'cube-intro');
-    ['up', 'right', 'down', 'left'].forEach((side) => {
-      const arrow = el('button', 'cube-intro-arrow');
-      arrow.type = 'button';
-      arrow.dataset.side = side;
-      arrow.setAttribute('aria-label', `Show the ${FACE_AT[side]} face`);
-      ui.append(arrow);
-    });
-    const label = el('div', 'cube-intro-label');
-    label.textContent = 'Drag to turn the page';
-    ui.append(label);
-    document.body.append(ui);
-    requestAnimationFrame(() => ui.classList.add('show'));
-
-    let floating = true;
-    const start = performance.now();
-    const easeOut = (t) => 1 - (1 - t) ** 3;
-    const frame = (now) => {
-      if (!floating) return;
-      const t = now - start;
-      const k = easeOut(Math.min(1, t / INTRO_SHRINK));
-      s.update({
-        rotateX: FLOAT_X * Math.sin(t / 1300) * k,
-        rotateY: FLOAT_Y * Math.sin(t / 900 + 1) * k,
-        pull: pull * k,
-      });
-      requestAnimationFrame(frame);
-    };
-    requestAnimationFrame(frame);
-
-    let settle = null;
-    const done = new Promise((resolve) => { settle = resolve; });
-    const listeners = [];
-    const listen = (target, type, fn, opts) => {
-      target.addEventListener(type, fn, opts);
-      listeners.push(() => target.removeEventListener(type, fn, opts));
-    };
-    const stop = () => {
-      floating = false;
-      listeners.forEach((off) => off());
-      ui.remove();
-    };
-    const end = (direction) => {
-      if (!floating) return;
-      stop();
-      s.finish(direction).then(settle);
-    };
-    const timer = setTimeout(() => end(null), INTRO_STAY);
-    listeners.push(() => clearTimeout(timer));
-
-    ui.querySelectorAll('.cube-intro-arrow').forEach((arrow) => {
-      listen(arrow, 'click', () => end(LOOK[arrow.dataset.side]));
-    });
-    listen(overlay, 'pointerdown', (e) => {
-      if (e.button !== 0 || !floating) return;
-      // dragging the floating cube turns it; it grows back into the page on release
-      stop();
-      track(e, { session: s, pull, onEnd: () => setTimeout(settle, 0) });
-    });
-    listen(document, 'keydown', (e) => {
-      if (e.metaKey || e.ctrlKey) return;
-      const side = KEYS[e.key];
-      e.preventDefault();
-      end(side ? LOOK[side] : null);
-    });
-    await done;
-  }
-
-  async function intro(widgetBox) {
-    const show = () => widgetBox.classList.add('show');
-    if (seen('cube-hinted')) {
-      show();
-      return;
-    }
-    await new Promise((resolve) => { setTimeout(resolve, INTRO_DELAY); });
-    remember('cube-hinted');
-    await reveal();
-    show();
-  }
-
   /* ---------------------------------------------------------------- init */
 
   const init = () => {
@@ -438,7 +320,7 @@
     edges();
     const box = widget();
     keyboard();
-    const afterLoad = () => intro(box);
+    const afterLoad = () => box.classList.add('show');
     if (document.readyState === 'complete') afterLoad();
     else window.addEventListener('load', afterLoad);
   };
