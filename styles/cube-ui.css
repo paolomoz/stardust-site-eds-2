@@ -5,7 +5,10 @@
 :root {
   --cube-edge-size: 18px;
   --cube-edge-glow: rgb(247 202 110 / 45%);
-  --cube-widget-size: 34px;
+  --cube-widget-size: 48px;
+  --cube-tag-width: 26px;
+  --cube-tag-height: 72px;
+  --cube-tag-open: 132px;
 }
 
 /* horizontal touch drags belong to the cube; vertical panning and pinch stay native */
@@ -82,17 +85,107 @@ html.cube-dragging * {
 
 /* widget */
 
-.cube-widget {
+/* the tag: a slim tab on the right edge at mid-height. The panel is always as wide as its open
+   size; closed it is slid right so only a strip peeks out. Opening slides it in and grows it. */
+.cube-tag {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
+  right: 0;
+  top: 50%;
   z-index: 2147483200; /* above the turn overlay: the widget mirrors the turn live */
-  display: grid;
-  place-items: center;
-  width: calc(var(--cube-widget-size) * 2.3);
-  height: calc(var(--cube-widget-size) * 2.3);
+  width: var(--cube-tag-open);
+  height: var(--cube-tag-height);
+  transform: translate(calc(var(--cube-tag-open) - var(--cube-tag-width)), -50%);
+  background: rgb(40 40 44 / 50%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-right: 0;
+  border-radius: 4px 0 0 4px;
+  color: var(--text, #f4f2ec);
   touch-action: none;
   user-select: none;
+  transition:
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s,
+    height 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s,
+    opacity 0.6s;
+}
+
+.cube-tag:hover,
+.cube-tag:focus-within,
+.cube-tag.dragging,
+.cube-tag.open {
+  transform: translate(0, -50%);
+  height: var(--cube-tag-open);
+  transition-delay: 0s;
+  transition-duration: 0.55s;
+}
+
+/* hidden until the page has loaded */
+.cube-tag:not(.show) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* the strip: the five other faces' seed colours along the visible edge, full tab height */
+.cube-tag-strip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 3px 0 0 3px;
+  overflow: hidden;
+  opacity: 0.9;
+}
+
+.cube-tag-swatch {
+  flex: 1;
+  background: var(--coral);
+}
+
+/* chevron in the peeking strip: points left, "pull this out" */
+.cube-tag-arrow {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border: solid currentcolor;
+  border-width: 1.5px 0 0 1.5px;
+  transform: rotate(-45deg);
+  opacity: 0.75;
+  transition: opacity 0.25s 0.3s;
+  animation: cube-tag-nudge 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@keyframes cube-tag-nudge {
+  0%,
+  100% { translate: 0 0; }
+  50% { translate: -3px 0; }
+}
+
+.cube-tag:hover .cube-tag-arrow,
+.cube-tag:focus-within .cube-tag-arrow,
+.cube-tag.dragging .cube-tag-arrow,
+.cube-tag.open .cube-tag-arrow {
+  opacity: 0;
+  animation: none;
+  transition-delay: 0s;
+}
+
+/* the widget: anchored to the tag's vertical centre so the cube only travels horizontally */
+.cube-widget {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: var(--cube-tag-open);
+  height: var(--cube-tag-open);
   outline: none;
 }
 
@@ -101,6 +194,10 @@ html.cube-dragging * {
   height: var(--cube-widget-size);
   perspective: calc(var(--cube-widget-size) * 6);
   cursor: grab;
+}
+
+.cube-tag.dragging .cube-widget-scene {
+  cursor: grabbing;
 }
 
 /* gentle float: two nested rockers, different periods */
@@ -138,110 +235,61 @@ html.cube-dragging * {
   transform-style: preserve-3d;
 }
 
-/* no filter or opacity here: either would flatten the 3D faces */
+/* faces: each is a miniature page in its own palette (the [data-cube-face] rules set the
+   tokens): the ground, a tile band, the signal and the seed. No filter or opacity here:
+   either would flatten the 3D faces. */
 .cube-widget .cube-face {
   position: absolute;
   inset: 0;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 20%);
-  transition: box-shadow 0.3s, opacity 0.8s;
+  overflow: hidden;
+  background: var(--page);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 22%);
+  transition: box-shadow 0.3s;
 }
 
-.cube-widget:hover .cube-face,
-.cube-widget:focus-visible .cube-face {
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 55%);
-}
-
-.cube-widget-arrow {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s;
-  animation: cube-arrow-blink 5s ease-in-out infinite; /* a slow soft blink every 5 seconds */
-}
-
-.cube-widget-arrow::before {
+.cube-widget .cube-face::before {
   content: "";
   position: absolute;
-  inset: 6px;
-  border: solid currentcolor;
-  border-width: 1.5px 1.5px 0 0;
-  transform: rotate(-45deg);
+  left: 18%;
+  right: 18%;
+  top: 22%;
+  height: 26%;
+  background: var(--navy);
 }
 
-@keyframes cube-arrow-blink {
-  0%,
-  32%,
-  100% { opacity: 0; }
-  14% { opacity: 0.6; }
+.cube-widget .cube-face::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  bottom: 20%;
+  width: 22%;
+  height: 10%;
+  background: var(--gold);
+  box-shadow: calc(var(--cube-widget-size) * 0.3) 0 0 0 var(--coral);
 }
 
-.cube-widget:hover .cube-widget-arrow,
-.cube-widget:focus-within .cube-widget-arrow {
-  animation: none;
-  opacity: 0.7;
+.cube-tag:hover .cube-face,
+.cube-widget:focus-visible .cube-face {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 60%);
 }
 
-.cube-widget .cube-widget-arrow:hover {
-  opacity: 1;
-}
-
-/* hidden until the reveal is over; faces fade individually since opacity on a 3D parent
-   would flatten the cube */
-.cube-widget:not(.show) {
-  pointer-events: none;
-}
-
-.cube-widget:not(.show) .cube-face,
-.cube-widget:not(.show) .cube-widget-arrow {
-  opacity: 0 !important;
-}
-
-.cube-widget-arrow[data-side="up"] {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.cube-widget-arrow[data-side="right"] {
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-}
-
-.cube-widget-arrow[data-side="right"]::before {
-  transform: rotate(45deg);
-}
-
-.cube-widget-arrow[data-side="down"] {
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.cube-widget-arrow[data-side="down"]::before {
-  transform: rotate(135deg);
-}
-
-.cube-widget-arrow[data-side="left"] {
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-}
-
-.cube-widget-arrow[data-side="left"]::before {
-  transform: rotate(225deg);
+/* the arrow buttons stay in the DOM for assistive tech; the tag shows the cube alone */
+.cube-widget-arrow {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cube-widget-sway,
   .cube-widget-bob,
-  .cube-widget-arrow {
+  .cube-tag-arrow {
     animation: none;
   }
 }

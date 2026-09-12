@@ -12,11 +12,13 @@
  *     threshold or on a flick, the other axis springs back.
  *   - Edge handles: thin strips on the four viewport edges. Drag one inward to pull that
  *     side's face in.
- *   - Widget: a small live cube in the corner mirrors the orientation. Drag it, click an
- *     arrow, or focus it and use the arrow keys. Arrows and keys use "look" semantics: the
- *     right arrow shows the face on the right.
- *     The widget fades in once the page has loaded and is the cube's discoverability element:
- *     the site opens straight into the page, nothing interrupts the first screen.
+ *   - Widget: a slim tag on the right edge at mid-height, with a strip of the five face colours
+ *     and a chevron. Hovering (or tapping, on touch) slides it open into a panel holding a small
+ *     live cube whose faces are miniatures of the pages in their palettes; it mirrors the
+ *     orientation, plays one slow demo turn on arrival, and is dragged to turn the page. On mouse
+ *     out the panel slides back into the edge while the cube keeps moving. Focus it and use the
+ *     arrow keys. Keys use "look" semantics: the right arrow shows the face on the right. The
+ *     tag is the cube's discoverability element: nothing interrupts the first screen.
  *
  * Alt + arrow keys turn as well, with the same look semantics.
  */
@@ -31,6 +33,8 @@
   const FLICK = 0.5; // px/ms along the axis that commit a turn on release
   const PAGE_GAIN = 2; // a drag of depth / PAGE_GAIN px is a full turn
   const WIDGET_TURN_PX = 140; // widget drag for a full turn
+  const DEMO_DELAY = 250; // ms after the pointer arrives before the demo turn
+  const DEMO_DURATION = 2600; // ms for the quarter turn out and back
   const PRESS_TILT = 4; // degrees of tilt toward the pointer while pressing
   const PRESS_PULL = 0.03; // camera pull-back while pressing, fraction of depth
 
@@ -54,6 +58,7 @@
     bottom: 'rotateX(-90deg)',
   };
 
+  const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const el = (tag, className) => {
     const node = document.createElement(tag);
     node.className = className;
@@ -229,11 +234,21 @@
   /* ---------------------------------------------------------------- widget */
 
   function widget() {
+    const tag = el('div', 'cube-tag');
+    const strip = el('div', 'cube-tag-strip');
+    ['right', 'left', 'top', 'bottom', 'back'].forEach((name) => {
+      const swatch = el('i', 'cube-tag-swatch');
+      swatch.setAttribute('data-cube-face', name);
+      strip.append(swatch);
+    });
+    const chevron = el('i', 'cube-tag-arrow');
+    tag.append(strip, chevron);
+
     const box = el('div', 'cube-widget');
     box.tabIndex = 0;
     box.setAttribute('role', 'group');
-    box.setAttribute('aria-label', 'Turn the page. Drag the cube, click an arrow or use the arrow keys.');
-    box.title = 'Turn the page: drag, click an arrow, or press the arrow keys';
+    box.setAttribute('aria-label', 'Turn the page. Drag the cube or use the arrow keys.');
+    box.title = 'Turn the page: drag the cube or press the arrow keys';
 
     const scene = el('div', 'cube-widget-scene');
     const sway = el('div', 'cube-widget-sway');
@@ -251,6 +266,7 @@
     scene.append(sway);
     box.append(scene);
 
+    // the arrows stay for assistive tech; the tag shows the cube alone
     ['up', 'right', 'down', 'left'].forEach((side) => {
       const arrow = el('button', 'cube-widget-arrow');
       arrow.type = 'button';
@@ -259,6 +275,7 @@
       arrow.addEventListener('click', () => cube.rotate(LOOK[side]));
       box.append(arrow);
     });
+    tag.append(box);
 
     const BASE = 'rotateX(-22deg) rotateY(-32deg)';
     const place = () => {
@@ -274,8 +291,36 @@
     // same composition order as the engine: Y outside, X inside
     const pose = (r) => `${BASE} rotateY(${r.rotateY}deg) rotateX(${r.rotateX}deg)`;
 
-    document.addEventListener('cube:scrub', (e) => { mini.style.transform = pose(e.detail); });
+    // demo: on arrival the cube shows a slow quarter turn and back; the faces change, the page
+    // does not. Any real interaction cancels it.
+    let demo = null;
+    let demoTimer = 0;
+    const demoCancel = () => {
+      clearTimeout(demoTimer);
+      if (demo) {
+        demo.cancel();
+        demo = null;
+        mini.style.transform = BASE;
+      }
+    };
+    tag.addEventListener('pointerenter', () => {
+      if (reduceMotion() || cube.isBusy() || demo) return;
+      demoTimer = setTimeout(() => {
+        if (cube.isBusy()) return;
+        const e = 'cubic-bezier(0.65, 0, 0.35, 1)';
+        demo = mini.animate([
+          { transform: pose({ rotateX: 0, rotateY: 0 }), offset: 0 },
+          { transform: pose({ rotateX: 0, rotateY: -90 }), offset: 0.42, easing: e },
+          { transform: pose({ rotateX: 0, rotateY: -90 }), offset: 0.58 },
+          { transform: pose({ rotateX: 0, rotateY: 0 }), offset: 1, easing: e },
+        ], { duration: DEMO_DURATION, easing: 'linear' });
+        demo.finished.then(() => { demo = null; }).catch(() => {});
+      }, DEMO_DELAY);
+    });
+
+    document.addEventListener('cube:scrub', (e) => { demoCancel(); mini.style.transform = pose(e.detail); });
     document.addEventListener('cube:turning', (e) => {
+      demoCancel();
       const {
         from, to, duration, easing,
       } = e.detail;
@@ -283,10 +328,14 @@
     });
     document.addEventListener('cube:settled', () => { place(); rest(); });
 
+    // a drag keeps the panel open even when the pointer leaves it
+    const dragging = (on) => tag.classList.toggle('dragging', on);
     scene.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 || cube.isBusy()) return;
       e.preventDefault();
-      track(e, { turnPx: WIDGET_TURN_PX });
+      demoCancel();
+      dragging(true);
+      track(e, { turnPx: WIDGET_TURN_PX, onEnd: () => dragging(false) });
     });
     box.addEventListener('keydown', (e) => {
       const side = KEYS[e.key];
@@ -295,9 +344,19 @@
       cube.rotate(LOOK[side]);
     });
 
-    document.body.append(box);
+    // touch has no hover: a tap on the closed tag opens it, a tap elsewhere closes it
+    tag.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' || tag.classList.contains('open')) return;
+      e.preventDefault();
+      tag.classList.add('open');
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (!tag.contains(e.target)) tag.classList.remove('open');
+    });
+
+    document.body.append(tag);
     requestAnimationFrame(() => { place(); rest(); });
-    return box;
+    return tag;
   }
 
   /* ---------------------------------------------------------------- keyboard */
