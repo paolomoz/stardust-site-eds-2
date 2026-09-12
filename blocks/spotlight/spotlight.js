@@ -12,7 +12,7 @@
  */
 
 import {
-  reveal, stagger, splitLines, onlyChild, reduced,
+  reveal, stagger, splitLines, onlyChild, reduced, mobile,
 } from '../../scripts/motion.js';
 import mountWarp from './warp.js';
 
@@ -185,6 +185,14 @@ export default async function decorate(block) {
   block.replaceChildren(wrap);
   reveal(block);
   stagger(block);
+
+  // small screens: a static stage, everything drawn, no shader, no scroll staging
+  if (mobile) {
+    canvas.remove();
+    pin.classList.add('in');
+    pin.style.setProperty('--ms', 1);
+    return;
+  }
 
   // warp shader aimed at the mark
   const warp = mountWarp(canvas, { speed: 1.2 });

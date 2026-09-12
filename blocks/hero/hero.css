@@ -319,21 +319,45 @@
   }
 }
 
+/* small screens: a plain two-row stage. The shader row is 46svh, the text row takes what it
+   needs (never clipped); there is no intro sequence, so nothing here is transformed. */
 @media (width <= 900px) {
   .hero {
-    height: 100svh;
+    height: auto;
+    min-height: 100svh;
     max-height: none;
-    scroll-snap-align: start;
-
-    --top: 46%;
+    display: grid;
+    grid-template-rows: 46svh minmax(54svh, auto);
   }
 
+  .hero .hero-visual {
+    position: relative;
+    inset: auto;
+  }
+
+  .hero .hero-visual canvas,
+  .hero.intro .hero-visual canvas {
+    bottom: 0;
+    height: 100%;
+    transition: none;
+  }
+
+  .hero .hero-slot,
   .hero.intro .hero-slot {
-    transform: translateY(58.7%);
+    inset: 0;
+    transform: none;
+  }
+
+  .hero .hero-text,
+  .hero.intro .hero-text {
+    position: relative;
+    inset: auto;
+    transform: none;
+    overflow: visible;
   }
 
   .hero .hero-text .bottom {
-    padding: 24px var(--pad) 28px;
+    padding: 28px var(--pad) 36px;
   }
 
   .hero .top .ver,

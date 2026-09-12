@@ -199,9 +199,82 @@ header .nav .kick.hit {
   }
 }
 
+/* menu button: two bars, hidden on wide screens */
+header .nav .nav-toggle {
+  display: none;
+  width: 56px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--text-08);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+header .nav .nav-toggle i {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: currentcolor;
+  transition: transform 0.35s var(--ease-out);
+}
+
+header .nav.open .nav-toggle i:first-child {
+  transform: translateY(3.75px) rotate(45deg);
+}
+
+header .nav.open .nav-toggle i:last-child {
+  transform: translateY(-3.75px) rotate(-45deg);
+}
+
 @media (width <= 700px) {
+  header .nav {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: var(--nav-h);
+    align-content: flex-start;
+  }
+
+  header .nav > * {
+    height: var(--nav-h);
+  }
+
+  header .nav .nav-toggle {
+    display: flex;
+    order: 1;
+  }
+
+  header .nav .spacer {
+    order: 0;
+  }
+
+  /* drawer rows: full width under the bar, only when open */
   header .nav a:not(.brand, .cta) {
     display: none;
+    order: 2;
+    flex: 0 0 100%;
+    height: 52px;
+    padding: 0 20px;
+    border-right: 0;
+    border-top: 1px solid var(--text-08);
+    justify-content: space-between;
+    background: color-mix(in srgb, var(--page) 92%, transparent);
+    color: var(--text);
+  }
+
+  header .nav.open a:not(.brand, .cta) {
+    display: flex;
+  }
+
+  /* the arrival animation never runs on small screens */
+  header .nav .flyer,
+  body.introducing header .nav .flyer {
+    transform: none;
+    opacity: 1;
   }
 }
 

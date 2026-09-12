@@ -11,7 +11,7 @@
  * decorateButtons() has already classed the CTAs; their paragraphs are moved, never cloned.
  */
 import {
-  reveal, stagger, splitLines, plus, observe, reduced,
+  reveal, stagger, splitLines, plus, observe, reduced, mobile,
 } from '../../scripts/motion.js';
 
 const PAUSE = { p: 60, c: 240, d: 160 };
@@ -54,10 +54,10 @@ function typewriter(pre, script, skipBtn) {
     const span = document.createElement('span');
     span.className = cls;
     pre.insertBefore(span, cur);
-    if (reduced || cls !== 'c') {
+    if (reduced || mobile || cls !== 'c') {
       span.textContent = text;
       pre.insertBefore(document.createTextNode('\n'), cur);
-      setTimeout(next, reduced ? 0 : pause);
+      setTimeout(next, reduced || mobile ? 0 : pause);
     } else {
       let k = 0;
       const type = () => {
@@ -154,7 +154,13 @@ export default async function decorate(block) {
     bar.append(title, skip);
     terminal.append(bar, pre);
     two.append(terminal);
-    observe(terminal, () => typewriter(pre, script, skip));
+    // small screens: the finished terminal, rendered now so the stage has its final height
+    if (mobile) {
+      skip.remove();
+      typewriter(pre, script, skip);
+    } else {
+      observe(terminal, () => typewriter(pre, script, skip));
+    }
   }
 
   // copy button: copies the /plugin lines of the terminal script

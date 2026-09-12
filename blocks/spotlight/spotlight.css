@@ -481,18 +481,22 @@
 @media (width <= 900px) {
   .spotlight .spot-wrap {
     height: auto;
-    scroll-snap-align: start;
   }
 
   .spotlight .spot-pin {
     position: static;
     height: auto;
-    min-height: 100svh;
+    min-height: 0;
     overflow: visible;
     display: grid;
-    grid-template-rows: auto auto 1fr;
-    padding-top: calc(var(--nav-h) + 24px);
+    grid-template-rows: auto auto auto;
+    padding-top: 56px;
     background: var(--navy);
+  }
+
+  /* no shader on small screens: a still glow behind the diagram */
+  .spotlight .spot-media.routes {
+    background: radial-gradient(ellipse at 30% 50%, var(--glow), var(--navy) 70%);
   }
 
   .spotlight .spot-copy {

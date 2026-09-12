@@ -163,12 +163,14 @@ footer .footer .foot-meta p {
 
 @media (width <= 900px) {
   footer .footer {
-    scroll-snap-align: start;
-    min-height: 100svh;
+    min-height: 0;
   }
 
   footer .footer .container {
-    padding-top: calc(var(--nav-h) + 24px);
+    padding-top: 56px;
+    padding-bottom: 32px;
+    grid-template-rows: auto auto;
+    gap: 40px;
   }
 
   footer .footer .meta {

@@ -461,13 +461,6 @@ main .section:empty {
   display: none;
 }
 
-/* ---------- small screens: every stage snaps ---------- */
-@media (width <= 900px) {
-  html {
-    scroll-snap-type: y proximity;
-  }
-}
-
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,

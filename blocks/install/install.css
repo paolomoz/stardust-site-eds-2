@@ -186,11 +186,13 @@
 
 @media (width <= 900px) {
   .install {
-    scroll-snap-align: start;
+    min-height: 0;
+    display: block;
+    padding: 72px 0 56px;
   }
 
   .install .two {
-    gap: 24px;
+    gap: 28px;
   }
 
   .install .terminal pre {

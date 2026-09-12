@@ -17,7 +17,7 @@
  */
 
 import {
-  reveal, stagger, splitLines, observe, onlyChild, reduced,
+  reveal, stagger, splitLines, observe, onlyChild, reduced, mobile,
 } from '../../scripts/motion.js';
 import { todayISO } from '../../scripts/seed.js';
 
@@ -322,7 +322,7 @@ function buildChapter(row, index, theme) {
 /* ---------------------------------------------------------------- scroll behaviours */
 
 function stackedUnfold(panels) {
-  if (reduced || panels.length < 2) return;
+  if (reduced || mobile || panels.length < 2) return;
   const update = () => {
     const vh = window.innerHeight;
     panels.forEach((p, k) => {
@@ -393,5 +393,5 @@ export default async function decorate(block) {
 
   stackedUnfold(panels);
   const step = rail.querySelector('.step');
-  railStep(step, panels, variant === 'migrate' ? 'light' : 'gold');
+  if (!mobile) railStep(step, panels, variant === 'migrate' ? 'light' : 'gold');
 }

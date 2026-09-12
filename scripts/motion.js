@@ -9,6 +9,9 @@
 
 export const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* small screens get the plain layout: no pinned stages, no intro, no scroll-driven staging */
+export const mobile = window.matchMedia('(width <= 900px)').matches;
+
 const callbacks = new WeakMap();
 let io;
 

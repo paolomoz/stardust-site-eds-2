@@ -11,9 +11,12 @@
   --cube-tag-open: 132px;
 }
 
-/* horizontal touch drags belong to the cube; vertical panning and pinch stay native */
-html {
-  touch-action: pan-y pinch-zoom;
+/* horizontal touch drags belong to the cube; vertical panning and pinch stay native.
+   Small screens and touch devices have no cube layer (scripts/cube-ui.js bails out). */
+@media (width > 900px) and (pointer: fine) {
+  html {
+    touch-action: pan-y pinch-zoom;
+  }
 }
 
 html.cube-dragging {

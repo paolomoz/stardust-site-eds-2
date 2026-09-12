@@ -13,7 +13,7 @@
  */
 
 import mountHero from './nebula.js';
-import { splitLines, reduced } from '../../scripts/motion.js';
+import { splitLines, reduced, mobile } from '../../scripts/motion.js';
 import { seedHash, todayISO } from '../../scripts/seed.js';
 
 const MARK = `<svg class="hero-mark" viewBox="0 0 280 280" data-reveal="scale" style="--i:1" aria-hidden="true">
@@ -160,8 +160,9 @@ export default async function decorate(block) {
   block.style.setProperty('--energy', 0);
 
   // the hero canvas: nebula shader, 2D fallback
-  const hero = mountHero(canvas);
-  if (!reduced) {
+  // small screens: the cheaper 2D dust field, no pointer parallax, no intro sequence
+  const hero = mountHero(canvas, { force2d: mobile });
+  if (!reduced && !mobile) {
     const p = hero.pointer;
     let lx = p.x;
     let ly = p.y;
@@ -190,7 +191,7 @@ export default async function decorate(block) {
     document.documentElement.dataset.intro = 'done';
     document.dispatchEvent(new CustomEvent('stardust:intro-done'));
   };
-  if (reduced) {
+  if (reduced || mobile) {
     block.classList.remove('intro', 'intro-lockup');
     block.querySelectorAll('.lines, [data-reveal]').forEach((n) => n.classList.add('in'));
     done();

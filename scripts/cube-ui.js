@@ -374,6 +374,9 @@
 
   /* ---------------------------------------------------------------- init */
 
+  // small screens and touch devices get the plain page: no cube layer at all
+  if (window.matchMedia('(width <= 900px), (pointer: coarse)').matches) return;
+
   const init = () => {
     pagePress();
     edges();

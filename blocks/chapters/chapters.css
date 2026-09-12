@@ -1137,21 +1137,25 @@
 }
 
 @media (width <= 900px) {
-  .chapters .ch-intro-block,
-  .chapters .chapter {
-    scroll-snap-align: start;
-  }
-
+  /* small screens: the series is a plain column. Panels flow one after the other at their
+     natural height, nothing is pinned, scaled or overlapped. */
   .chapters .ch-intro-block {
-    min-height: 100svh;
-    display: grid;
-    align-content: center;
-    padding-top: calc(var(--nav-h) + 24px);
-    padding-bottom: 32px;
+    min-height: 0;
+    display: block;
+    padding-top: 72px;
+    padding-bottom: 40px;
   }
 
   .chapters.migrate .ch-intro-block {
-    padding-top: calc(var(--nav-h) + 24px);
+    padding-top: 72px;
+  }
+
+  .chapters .stack .chapter {
+    position: static;
+    z-index: auto;
+    transform: none !important;
+    filter: none !important;
+    box-shadow: none;
   }
 
   .chapters .ch-intro-block .two {
@@ -1176,13 +1180,14 @@
 
   .chapters .chapter {
     height: auto;
-    min-height: 100svh;
+    min-height: 0;
   }
 
   .chapters .ch-inner {
-    padding: calc(var(--nav-h) + 16px) var(--pad) 20px;
-    gap: 14px;
-    align-content: center;
+    height: auto;
+    padding: 44px var(--pad) 44px;
+    gap: 22px;
+    align-content: start;
     grid-template-rows: auto auto;
   }
 

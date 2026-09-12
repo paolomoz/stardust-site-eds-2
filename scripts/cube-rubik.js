@@ -28,6 +28,8 @@
 (() => {
   const { cube } = window;
   if (!cube || !cube.registerFace) return;
+  // no cube layer on small screens and touch devices (see scripts/cube-ui.js)
+  if (window.matchMedia('(width <= 900px), (pointer: coarse)').matches) return;
 
   const RUBIK_FACE = 'back';
   const ROWS = 2;

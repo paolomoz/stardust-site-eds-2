@@ -11,7 +11,7 @@
 
 import { getMetadata } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
-import { plus, reduced } from '../../scripts/motion.js';
+import { plus, reduced, mobile } from '../../scripts/motion.js';
 
 const MARK = `<svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><g class="f-gold">
 <rect x="14" y="2" width="4" height="4"/><rect x="14" y="26" width="4" height="4"/>
@@ -52,7 +52,7 @@ function sparks(x, y, count) {
 function arrival(nav) {
   const flyers = [...nav.querySelectorAll('.flyer')];
   const cta = nav.querySelector('.cta');
-  if (!flyers.length || reduced) return;
+  if (!flyers.length || reduced || mobile) return;
   const last = nav.lastElementChild !== nav.querySelector('.spacer') ? nav.lastElementChild : null;
   let parkRight = last ? last.getBoundingClientRect().left : window.innerWidth;
   const froms = [...flyers].reverse().map((f) => {
@@ -119,6 +119,24 @@ export default async function decorate(block) {
     });
   }
 
+  // small screens: the flyers and tools live in a drawer under the bar, behind a menu button
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'nav-toggle';
+  toggle.setAttribute('aria-label', 'Open navigation');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.innerHTML = '<i></i><i></i>';
+  toggle.addEventListener('click', () => {
+    const open = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+  });
+  spacer.after(toggle);
+  nav.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => {
+    nav.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+  }));
+
   const progress = document.createElement('div');
   progress.className = 'progress';
   progress.setAttribute('aria-hidden', 'true');
@@ -128,14 +146,17 @@ export default async function decorate(block) {
   // hide on scroll down, show on scroll up; gold progress bar
   const bar = progress.firstElementChild;
   let lastY = 0;
+  let holdUntil = 0; // a jump from a nav link must not hide the bar
   const onScroll = () => {
     const y = window.scrollY;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     bar.style.transform = `scaleX(${Math.min(1, max > 0 ? y / max : 0)})`;
-    if (y > 120 && y > lastY + 4) nav.classList.add('hide');
+    if (performance.now() < holdUntil) nav.classList.remove('hide');
+    else if (y > 120 && y > lastY + 4) nav.classList.add('hide');
     else if (y < lastY - 4 || y < 120) nav.classList.remove('hide');
     lastY = y;
   };
+  nav.querySelectorAll('a[href*="#"]').forEach((a) => a.addEventListener('click', () => { holdUntil = performance.now() + 1500; }));
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 

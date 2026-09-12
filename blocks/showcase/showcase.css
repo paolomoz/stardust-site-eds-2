@@ -86,11 +86,9 @@
 
 @media (width <= 900px) {
   .showcase {
-    scroll-snap-align: start;
-    min-height: 100svh;
-    display: grid;
-    align-content: center;
-    padding: calc(var(--nav-h) + 24px) 0 32px;
+    min-height: 0;
+    display: block;
+    padding: 72px 0 56px;
   }
 
   .showcase .show-head {
