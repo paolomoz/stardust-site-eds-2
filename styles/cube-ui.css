@@ -236,8 +236,9 @@ html.cube-dragging * {
 }
 
 /* faces: each is a miniature page in its own palette (the [data-cube-face] rules set the
-   tokens): the ground, a tile band, the signal and the seed. No filter or opacity here:
-   either would flatten the 3D faces. */
+   tokens): the ground, a tile band, the signal and the seed. The puzzle face (.rubik-mini, see
+   cube-rubik.css) shows its sticker grid instead. No filter or opacity here: either would
+   flatten the 3D faces. */
 .cube-widget .cube-face {
   position: absolute;
   inset: 0;
@@ -247,7 +248,7 @@ html.cube-dragging * {
   transition: box-shadow 0.3s;
 }
 
-.cube-widget .cube-face::before {
+.cube-widget .cube-face:not(.rubik-mini, .rubik-mini-cell)::before {
   content: "";
   position: absolute;
   left: 18%;
@@ -257,7 +258,7 @@ html.cube-dragging * {
   background: var(--navy);
 }
 
-.cube-widget .cube-face::after {
+.cube-widget .cube-face:not(.rubik-mini, .rubik-mini-cell)::after {
   content: "";
   position: absolute;
   left: 18%;

@@ -137,7 +137,8 @@
 
 /* mini grid on the widget's Rubik face */
 
-.rubik-mini {
+/* out-ranks the widget's face paint (.cube-widget .cube-face) so the plastic ground shows */
+.cube-widget .rubik-mini {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
@@ -149,6 +150,8 @@
 .cube-widget .rubik-mini .cube-face {
   position: static;
   inset: auto;
+  overflow: visible;
   border-radius: 1px;
   box-shadow: none;
+  background: var(--page);
 }

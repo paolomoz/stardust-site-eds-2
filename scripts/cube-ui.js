@@ -34,7 +34,7 @@
   const PAGE_GAIN = 2; // a drag of depth / PAGE_GAIN px is a full turn
   const WIDGET_TURN_PX = 140; // widget drag for a full turn
   const DEMO_DELAY = 250; // ms after the pointer arrives before the demo turn
-  const DEMO_DURATION = 2600; // ms for the quarter turn out and back
+  const DEMO_DURATION = 3400; // ms for the half turn to the puzzle face and on round
   const PRESS_TILT = 4; // degrees of tilt toward the pointer while pressing
   const PRESS_PULL = 0.03; // camera pull-back while pressing, fraction of depth
 
@@ -291,8 +291,8 @@
     // same composition order as the engine: Y outside, X inside
     const pose = (r) => `${BASE} rotateY(${r.rotateY}deg) rotateX(${r.rotateX}deg)`;
 
-    // demo: on arrival the cube shows a slow quarter turn and back; the faces change, the page
-    // does not. Any real interaction cancels it.
+    // demo: on arrival the cube turns slowly to its back face, the puzzle, holds so the sticker
+    // grid is seen, and returns; the page does not move. Any real interaction cancels it.
     let demo = null;
     let demoTimer = 0;
     const demoCancel = () => {
@@ -310,9 +310,9 @@
         const e = 'cubic-bezier(0.65, 0, 0.35, 1)';
         demo = mini.animate([
           { transform: pose({ rotateX: 0, rotateY: 0 }), offset: 0 },
-          { transform: pose({ rotateX: 0, rotateY: -90 }), offset: 0.42, easing: e },
-          { transform: pose({ rotateX: 0, rotateY: -90 }), offset: 0.58 },
-          { transform: pose({ rotateX: 0, rotateY: 0 }), offset: 1, easing: e },
+          { transform: pose({ rotateX: 0, rotateY: 180 }), offset: 0.4, easing: e },
+          { transform: pose({ rotateX: 0, rotateY: 180 }), offset: 0.62 },
+          { transform: pose({ rotateX: 0, rotateY: 360 }), offset: 1, easing: e },
         ], { duration: DEMO_DURATION, easing: 'linear' });
         demo.finished.then(() => { demo = null; }).catch(() => {});
       }, DEMO_DELAY);
