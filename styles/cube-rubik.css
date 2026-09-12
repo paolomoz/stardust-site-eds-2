@@ -147,11 +147,13 @@
   background: var(--rubik-plastic);
 }
 
+/* stickers take each palette's seed colour: the grounds are too dark to tell apart at 15px,
+   and the seeds are the face language the tag strip already uses */
 .cube-widget .rubik-mini .cube-face {
   position: static;
   inset: auto;
   overflow: visible;
   border-radius: 1px;
-  box-shadow: none;
-  background: var(--page);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 25%);
+  background: var(--coral);
 }
