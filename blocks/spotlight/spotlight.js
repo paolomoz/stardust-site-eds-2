@@ -18,7 +18,8 @@ import mountWarp from './warp.js';
 
 const MARK = '<g class="f-gold"> <rect x="128" y="34" width="24" height="24"/> <rect x="128" y="62" width="24" height="24" opacity="0.7"/> <rect x="128" y="90" width="24" height="24" opacity="0.5"/> <rect x="128" y="166" width="24" height="24" opacity="0.5"/> <rect x="128" y="194" width="24" height="24" opacity="0.7"/> <rect x="128" y="222" width="24" height="24"/> <rect x="34" y="128" width="24" height="24"/> <rect x="62" y="128" width="24" height="24" opacity="0.7"/> <rect x="90" y="128" width="24" height="24" opacity="0.5"/> <rect x="166" y="128" width="24" height="24" opacity="0.5"/> <rect x="194" y="128" width="24" height="24" opacity="0.7"/> <rect x="222" y="128" width="24" height="24"/> </g> <rect x="118" y="118" width="44" height="44" class="f-coral"/> <g class="f-gold" opacity="0.6"> <rect x="82" y="82" width="18" height="18"/> <rect x="180" y="82" width="18" height="18"/> <rect x="82" y="180" width="18" height="18"/> <rect x="180" y="180" width="18" height="18"/> </g>';
 
-const LABEL_FONT = 'font-family="SF Mono, ui-monospace, Menlo, monospace" font-size="19" letter-spacing="1.5"';
+// step labels: 30 % larger and one weight up from the prototype, no stroke, for readability
+const LABEL_FONT = 'font-family="SF Mono, ui-monospace, Menlo, monospace" font-size="25" font-weight="500" letter-spacing="2"';
 
 // branch geometry per lane: lane 0 goes up, lane 1 goes down
 const LANES = [
@@ -30,7 +31,8 @@ const LANES = [
   },
 ];
 
-const PRESET_X = { 4: [392, 580, 768, 982], 3: [392, 687, 982] };
+// node x per lane length; the four-step lane is spaced for the larger labels (no collisions)
+const PRESET_X = { 4: [392, 570, 748, 982], 3: [392, 687, 982] };
 
 function labelXs(n) {
   if (PRESET_X[n]) return PRESET_X[n];
@@ -46,10 +48,13 @@ function routeSvg(routes) {
     const xs = labelXs(steps.length);
     const b2 = k ? ' b2' : '';
     const nodes = xs.map((x) => `<rect x="${x}" y="${L.nodeY}" width="18" height="18"/>`).join('');
+    // labels sit centred on their node; the last one ends at its node so it stays on the stage
     const labels = steps.map((s, i) => {
       const last = i === steps.length - 1;
-      const x = last ? xs[i] + 18 : xs[i];
-      return `<text x="${x}" y="${L.labelY}"${last ? ' text-anchor="end"' : ''}>${esc(s)}</text>`;
+      let x = xs[i] + 9;
+      let anchor = ' text-anchor="middle"';
+      if (last) { x = xs[i] + 18; anchor = ' text-anchor="end"'; }
+      return `<text x="${x}" y="${L.labelY}"${anchor}>${esc(s)}</text>`;
     }).join('');
     return `<path class="${L.cls}" d="${L.path}" fill="none" stroke-width="2"${L.extra}/>`
       + `<g class="nodes${b2} ${L.fill}">${nodes}</g>`

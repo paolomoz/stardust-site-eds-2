@@ -64,10 +64,6 @@
   opacity: calc(2.2 - var(--ms) * 1.2);
 }
 
-.spotlight .route-svg text {
-  stroke: var(--navy);
-}
-
 .spotlight .route-svg .branch {
   stroke-dasharray: 3000;
   stroke-dashoffset: 3000;
