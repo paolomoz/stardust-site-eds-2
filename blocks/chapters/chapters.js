@@ -379,6 +379,15 @@ export default async function decorate(block) {
   laneTab.setAttribute('aria-hidden', 'true');
 
   const intro = buildIntro(rows[0], variant);
+  if (mobile) {
+    // small screens: the intro takes the door's ground and word, as the desktop scene's intro
+    // screen does (scripts/scene.js), without the lane, the tab or the pinning
+    const word = document.querySelector(`.spotlight a.door[href$="#${variant}"] .word`);
+    const title = el('div', 'ch-title', word ? word.textContent.trim() : label);
+    title.setAttribute('aria-hidden', 'true');
+    intro.prepend(title);
+    intro.classList.add('door');
+  }
   const stack = el('div', 'stack');
   rows.slice(1).forEach((row, i) => {
     stack.append(buildChapter(row, i + 1, themes[i % themes.length]));

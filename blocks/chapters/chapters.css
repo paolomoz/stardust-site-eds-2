@@ -1133,6 +1133,53 @@
     padding-top: 72px;
   }
 
+  /* the intro on the door's ground, with the door's word: the same screen as the desktop scene's
+     intro (styles/scene.css), flat */
+  .chapters .ch-intro-block.door {
+    background: var(--lane);
+    color: var(--navy);
+    padding-top: 64px;
+    padding-bottom: 48px;
+  }
+
+  .chapters .ch-intro-block.door .ch-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(48px, 14vw, 72px);
+    letter-spacing: -0.05em;
+    line-height: 0.9;
+    color: var(--navy);
+    margin-bottom: 44px;
+  }
+
+  .chapters .ch-intro-block.door .t-xl {
+    color: var(--navy);
+  }
+
+  .chapters .ch-intro-block.door .lane-ink {
+    color: color-mix(in srgb, var(--navy) 55%, transparent);
+  }
+
+  .chapters .ch-intro-block.door .t-lede {
+    color: color-mix(in srgb, var(--navy) 76%, transparent);
+  }
+
+  .chapters .ch-intro-block.door .aside-quote {
+    border-color: var(--navy);
+  }
+
+  .chapters .ch-intro-block.door .aside-quote p {
+    color: var(--navy);
+  }
+
+  .chapters .ch-intro-block.door .aside-quote p + p {
+    color: color-mix(in srgb, var(--navy) 60%, transparent);
+  }
+
+  .chapters .ch-intro-block.door .flow .box {
+    background: var(--navy);
+  }
+
   .chapters .stack .chapter {
     position: static;
     z-index: auto;
