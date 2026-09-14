@@ -17,7 +17,7 @@
  */
 
 import {
-  reveal, stagger, splitLines, observe, onlyChild, reduced, mobile, scene,
+  reveal, stagger, splitLines, observe, onlyChild, reduced, mobile, scene, arrow,
 } from '../../scripts/motion.js';
 import { todayISO } from '../../scripts/seed.js';
 
@@ -220,7 +220,8 @@ function buildIntro(row, variant) {
     flow.setAttribute('data-stagger', '');
     [...list.children].forEach((li, i) => {
       if (i) {
-        const arr = el('div', 'arr', '<span>&rarr;</span>');
+        const arr = el('div', 'arr', '<span></span>');
+        arr.firstElementChild.append(arrow('right'));
         arr.setAttribute('data-reveal', 'fade');
         flow.append(arr);
       }
@@ -306,7 +307,9 @@ function buildChapter(row, index, theme) {
       if (a.target) cta.target = a.target;
       const label = el('span');
       label.append(...a.childNodes);
-      cta.append(label, el('span', 'arr', '&rarr;'));
+      const arr = el('span', 'arr');
+      arr.append(arrow('right'));
+      cta.append(label, arr);
       covers.append(cta);
     }
     // leftovers: anything not consumed stays visible

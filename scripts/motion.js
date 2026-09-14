@@ -111,6 +111,22 @@ export function splitLines(el, delay) {
   return el;
 }
 
+/**
+ * A drawn arrow icon in the plus icon's stroke, replacing text glyphs (→ ↓) used as icons.
+ * @param {'right'|'down'} dir
+ * @returns {SVGElement}
+ */
+export function arrow(dir = 'right') {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'ico');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', dir === 'down' ? 'M8 2.5v11M3.5 9 8 13.5 12.5 9' : 'M2.5 8h11M9 3.5 13.5 8 9 12.5');
+  svg.append(path);
+  return svg;
+}
+
 /** @returns {HTMLElement} the "+" glyph */
 export function plus() {
   const i = document.createElement('i');

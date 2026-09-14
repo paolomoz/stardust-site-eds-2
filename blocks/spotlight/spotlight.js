@@ -12,7 +12,7 @@
  */
 
 import {
-  reveal, stagger, splitLines, onlyChild, reduced, mobile, scene,
+  reveal, stagger, splitLines, onlyChild, reduced, mobile, scene, arrow,
 } from '../../scripts/motion.js';
 import mountWarp from './warp.js';
 
@@ -65,7 +65,7 @@ function routeSvg(routes) {
 }
 
 const PG = '<i class="n"></i><i class="h"></i><i class="r"></i><i class="t"></i>';
-const abMock = (variant) => `<div class="pg a">${PG}<b>A</b></div><span class="arrow">&rarr;</span><div class="pg b ${variant}">${PG}<b>B</b></div>`;
+const abMock = (variant) => `<div class="pg a">${PG}<b>A</b></div><span class="arrow"></span><div class="pg b ${variant}">${PG}<b>B</b></div>`;
 
 const el = (tag, className) => {
   const n = document.createElement(tag);
@@ -111,6 +111,7 @@ function buildDoor(d, index) {
   const ab = el('div', 'ab');
   ab.setAttribute('aria-hidden', 'true');
   ab.innerHTML = abMock(index % 2 ? 'same' : 'redesign');
+  ab.querySelector('.arrow').append(arrow('right'));
   tile.append(ab);
   if (d.label || d.shortcut || d.small) {
     const short = el('div', 'short');
@@ -137,7 +138,7 @@ function buildDoor(d, index) {
     target.replaceWith(...target.childNodes);
     go.append(d.link);
     const arr = el('span', 'arr');
-    arr.textContent = '↓';
+    arr.append(arrow('down'));
     go.append(arr);
     tile.append(go);
   }

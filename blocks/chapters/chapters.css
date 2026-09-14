@@ -86,13 +86,6 @@
 
 .chapters .flow .arr span {
   display: inline-block;
-  animation: flow 1.6s var(--ease-in-out) infinite;
-}
-
-@keyframes flow {
-  0% { transform: translateX(-120%); }
-  50% { transform: translateX(0); }
-  100% { transform: translateX(120%); }
 }
 
 /* ---- rail: overlay so the panel zoom never moves it ---- */
@@ -204,7 +197,6 @@
   bottom: 0;
   height: 100svh;
   min-height: 640px;
-  overflow: hidden;
   background: var(--bg);
   color: var(--fg);
   transform-origin: 50% 100%;
@@ -698,14 +690,6 @@
   width: 14px;
   height: 14px;
   background: var(--coral);
-  box-shadow: 0 0 0 0 color-mix(in srgb, var(--coral) 50%, transparent);
-  animation: pulse 2.4s var(--ease-in-out) infinite;
-}
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--coral) 45%, transparent); }
-  70% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--coral) 0%, transparent); }
-  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--coral) 0%, transparent); }
 }
 
 /* before / after */
@@ -912,7 +896,6 @@
   top: 0;
   height: 2px;
   background: var(--gold);
-  box-shadow: 0 0 18px var(--gold);
   animation: scan 2.8s var(--ease-in-out) infinite;
   opacity: 0.9;
 }
@@ -1263,4 +1246,98 @@
   .chapters .mock-capture .type .aa {
     font-size: 40px;
   }
+}
+
+/* ---- flat mock interiors, readable small type (the AI slop review, 2026-09-14) ---- */
+
+/* the window frame keeps its elevation and loses the hairline; inner boxes read as fills and rows */
+.chapters .mock {
+  border: 0;
+  font-size: 12px;
+}
+
+.chapters .mock .bar .url {
+  color: var(--text-72);
+}
+
+.chapters .ch-no .cmd {
+  color: var(--fg-72);
+}
+
+.chapters .mock-seed .roll {
+  gap: 0;
+  border: 0;
+  background: transparent;
+}
+
+.chapters .mock-seed .roll div {
+  background: transparent;
+  border-bottom: 1px solid var(--text-08);
+  padding: 10px 0;
+}
+
+.chapters .mock-seed .roll div .p {
+  font-size: 11px;
+}
+
+.chapters .mock-replica .pair {
+  gap: 0;
+}
+
+.chapters .mock-replica .thumb {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 26px 0 0;
+}
+
+.chapters .mock-replica .thumb:first-child {
+  border-right: 1px solid var(--text-08);
+  padding-right: 14px;
+}
+
+.chapters .mock-replica .thumb:last-child {
+  padding-left: 14px;
+}
+
+.chapters .mock-replica .thumb .label {
+  left: 0;
+}
+
+.chapters .mock-replica .thumb:last-child .label {
+  left: 14px;
+}
+
+.chapters .mock-replica .gates b,
+.chapters .mock-capture .tags b {
+  border: 0;
+  background: var(--text-08);
+}
+
+.chapters .mock-blocks .blk {
+  border: 0;
+}
+
+.chapters .mock-blocks .blk .name {
+  border: 0;
+  background: color-mix(in srgb, var(--gold) 18%, var(--navy));
+  font-size: 11px;
+}
+
+.chapters .mock-ba .bar .tabs b,
+.chapters .mock-ledger .st {
+  font-size: 11px;
+}
+
+.chapters .mock-ledger .foot {
+  font-size: 12px;
+}
+
+.chapters .flow .box {
+  border: 0;
+}
+
+.chapters .rail-overlay .step,
+.chapters .lane-tab {
+  font-size: 12px;
 }

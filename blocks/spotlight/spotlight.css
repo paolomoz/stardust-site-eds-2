@@ -68,12 +68,10 @@
   stroke-dasharray: 3000;
   stroke-dashoffset: 3000;
   transition: stroke-dashoffset 3s var(--ease-out) 0.35s;
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--gold) 35%, transparent));
 }
 
 .spotlight .route-svg .branch.b2 {
   transition-delay: 0.65s;
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--text) 25%, transparent));
 }
 
 .spotlight .route-svg .nodes rect,
@@ -118,7 +116,7 @@
   transform: scale(0.7) translateY(18px);
   opacity: 0;
   transition:
-    transform 1.8s cubic-bezier(0.2, 1.12, 0.3, 1),
+    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 1s var(--ease-out);
 }
 
@@ -135,7 +133,7 @@
 }
 
 .spotlight .route-svg .root svg {
-  filter: drop-shadow(0 0 26px color-mix(in srgb, var(--gold) 28%, transparent)) drop-shadow(0 16px 36px rgb(0 0 0 / 45%));
+  filter: drop-shadow(0 16px 36px rgb(0 0 0 / 45%));
   overflow: visible;
 }
 
@@ -555,4 +553,48 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* ---- readability and flatness (the AI slop review, 2026-09-14) ---- */
+
+/* secondary copy takes an ink tint at full opacity instead of fading */
+.spotlight .stile p {
+  opacity: 1;
+  color: color-mix(in srgb, var(--navy) 82%, transparent);
+}
+
+.spotlight .stile .short .small {
+  opacity: 1;
+  color: color-mix(in srgb, var(--navy) 76%, transparent);
+}
+
+.spotlight .stile .short .label {
+  color: color-mix(in srgb, var(--navy) 70%, transparent);
+}
+
+.spotlight .stile .route {
+  color: color-mix(in srgb, var(--navy) 78%, transparent);
+}
+
+/* the A → B mini pages are fills, not framed cards; only "same" keeps its dashed new-origin frame */
+.spotlight .stile .ab .pg {
+  border: 0;
+  background: color-mix(in srgb, var(--navy) 10%, transparent);
+}
+
+.spotlight .stile .ab .pg.same {
+  border: 1px dashed color-mix(in srgb, var(--navy) 55%, transparent);
+  background: transparent;
+}
+
+.spotlight .stile.door:hover .ab .pg {
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.spotlight .stile.door:hover .ab .pg.same {
+  background: transparent;
+}
+
+.spotlight .stile .ab .pg b {
+  font-size: 11px;
 }

@@ -13,7 +13,9 @@
  */
 
 import mountHero from './nebula.js';
-import { splitLines, reduced, mobile } from '../../scripts/motion.js';
+import {
+  splitLines, reduced, mobile, arrow,
+} from '../../scripts/motion.js';
 import { seedHash, todayISO, onNewDay } from '../../scripts/seed.js';
 
 const MARK = `<svg class="hero-mark" viewBox="0 0 280 280" data-reveal="scale" style="--i:1" aria-hidden="true">
@@ -149,9 +151,9 @@ export default async function decorate(block) {
     const s = el('div', 'scroll', { 'data-reveal': 'fade' });
     s.style.setProperty('--i', 8);
     const a = scroll.querySelector('a');
-    const arrow = el('span', 'arrow');
-    arrow.textContent = '↓';
-    a.append(' ', arrow);
+    const cue = el('span', 'arrow');
+    cue.append(arrow('down'));
+    a.append(' ', cue);
     s.append(scroll);
     textHalf.append(s);
   }

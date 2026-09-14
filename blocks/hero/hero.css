@@ -17,7 +17,6 @@
  * canvas shrinks from the bottom.
  */
 .hero .hero-text {
-  overflow: hidden;
   transition: transform 1.15s cubic-bezier(0.7, 0, 0.18, 1);
 }
 
@@ -160,9 +159,7 @@
   transform: translate3d(calc(var(--px) * -26px), calc(var(--py) * -16px), 0);
   will-change: transform, filter;
   filter: blur(calc(var(--energy) * 7px));
-  text-shadow:
-    0 0 calc(var(--energy) * 60px) color-mix(in srgb, var(--gold) calc(var(--energy) * 90%), transparent),
-    0 20px 60px color-mix(in srgb, var(--page) 60%, transparent);
+  text-shadow: 0 20px 60px color-mix(in srgb, var(--page) 60%, transparent);
   mix-blend-mode: screen;
 }
 
@@ -220,9 +217,8 @@
   align-items: center;
   color: color-mix(in srgb, var(--navy) 70%, transparent); /* 5.9:1 on the text ground */
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.04em;
   margin: 0;
   max-width: none;
   line-height: 1.55;
@@ -230,6 +226,8 @@
 
 .hero .seed-line strong {
   font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .hero .seed-line .hash {
@@ -284,7 +282,7 @@
   gap: 10px;
   color: color-mix(in srgb, var(--navy) 55%, transparent);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }

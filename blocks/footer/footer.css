@@ -22,9 +22,8 @@ footer .footer .meta {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 24px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.02em;
   color: var(--text-55);
   line-height: 1.8;
 }
@@ -127,9 +126,9 @@ footer .footer .big span:hover {
 footer .footer .foot-meta {
   margin: 26px 0 0;
   color: var(--text-55);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: none; /* a sentence, not a label (.mono would uppercase it) */
+  font-size: 12px;
 }
 
 footer .footer .foot-meta p {

@@ -181,7 +181,7 @@
   background: var(--navy);
   color: var(--gold);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -219,7 +219,6 @@
   min-height: 0;
   padding: calc(var(--nav-h) + 24px) 0 40px;
   background: var(--page);
-  overflow: hidden;
   transform-origin: 50% 100%;
 }
 
@@ -241,7 +240,6 @@
   min-height: 0;
   padding-top: calc(var(--nav-h) + 24px);
   padding-bottom: 40px;
-  overflow: hidden;
 }
 
 /* rails: a line in two segments and the step chip, above the panels, under the nav */
@@ -291,7 +289,7 @@
   background: var(--lane);
   color: var(--lane-ink);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
