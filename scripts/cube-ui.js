@@ -13,7 +13,7 @@
  *   - Edge handles: thin strips on the four viewport edges. Drag one inward to pull that
  *     side's face in.
  *   - Widget: a slim tag on the right edge at mid-height, with a strip of the five face colours
- *     and a chevron. Hovering (or tapping, on touch) slides it open into a panel holding a small
+ *     and a chevron. A click slides it open into a panel holding a small
  *     live cube whose faces are miniatures of the pages in their palettes; it mirrors the
  *     orientation, plays one slow demo turn on arrival, and is dragged to turn the page. The
  *     panel stays open until its collapse arrow is clicked (or Escape); then it slides back into
@@ -255,9 +255,9 @@
         tag.classList.remove('open');
       });
       tag.append(strip, chevron, close);
-      // same as scripts/cube-tag.js: opens on arrival, closes only from the arrow or Escape
+      // same as scripts/cube-tag.js: opens on a click, closes only from the arrow or Escape
       const open = () => tag.classList.add('open');
-      tag.addEventListener('pointerenter', open);
+      tag.addEventListener('click', open);
       tag.addEventListener('focusin', open);
       tag.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') tag.classList.remove('open');
@@ -341,7 +341,9 @@
         demo.finished.then(() => { demo = null; }).catch(() => {});
       }, DEMO_DELAY);
     };
-    tag.addEventListener('pointerenter', arrive);
+    // the demo plays when the panel opens; the click that opens it is handled first (the tag's
+    // own listener was added earlier), so the class is already there
+    tag.addEventListener('click', () => { if (tag.classList.contains('open')) arrive(); });
 
     document.addEventListener('cube:scrub', (e) => { demoCancel(); mini.style.transform = pose(e.detail); });
     document.addEventListener('cube:turning', (e) => {
@@ -373,7 +375,7 @@
     requestAnimationFrame(() => { place(); rest(); });
     // loaded by the pointer arriving on the tag: the arrival already happened
     if (existing && document.activeElement === tag) box.focus();
-    if (existing && (tag.matches(':hover') || tag.contains(document.activeElement))) arrive();
+    if (existing && tag.classList.contains('open')) arrive();
     return tag;
   }
 

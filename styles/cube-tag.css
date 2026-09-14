@@ -20,7 +20,7 @@
 /* the tag: a slim tab on the right edge at mid-height. The panel is always its open size; closed
    it is slid right so only a strip peeks out, and clipped top and bottom to the tab height.
    Opening slides it in and lets the clip go: transform and clip-path only, no layout in the
-   animation. It opens on hover or focus and stays open until its arrow is clicked. */
+   animation. It opens on a click or focus and stays open until its arrow is clicked. */
 .cube-tag {
   position: fixed;
   right: 0;
@@ -36,6 +36,7 @@
   border-left: 1px solid var(--cube-tag-line);
   border-radius: 4px 0 0 4px;
   color: var(--text, #f4f2ec);
+  cursor: pointer;
   touch-action: none;
   user-select: none;
   transition:
@@ -48,6 +49,7 @@
 .cube-tag.open {
   transform: translate(0, -50%);
   clip-path: inset(0 round 4px 0 0 4px);
+  cursor: default;
   transition-duration: 0.55s;
 }
 

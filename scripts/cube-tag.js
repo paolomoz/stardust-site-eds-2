@@ -10,8 +10,8 @@
  *     for that) and, since a stored orientation means the visitor already turned the cube in this
  *     session, loads the whole layer at once.
  *   - Draws the closed tag after load: the strip of face colours and the chevron on the right
- *     edge, styled by styles/cube-tag.css. Hovering, focusing or tapping it opens it and loads
- *     the layer; scripts/cube-ui.js takes the tag over. The panel stays open until its collapse
+ *     edge, styled by styles/cube-tag.css. Hovering it loads the layer; a click (or focus) opens
+ *     it and scripts/cube-ui.js takes the tag over. The panel stays open until its collapse
  *     arrow is clicked.
  *   - Prefetches the layer when the pointer approaches the right edge, so the tag opens without
  *     a wait: stylesheets are applied (they only style cube elements) and the modules are
@@ -92,11 +92,12 @@ function loadLayer() {
 
 /* ---------------------------------------------------------------- the tag */
 
-/* the panel opens when the pointer or focus arrives and stays open: only its arrow (or Escape)
-   slides it back. scripts/cube-ui.js builds the same pair when it draws the tag itself. */
+/* the panel opens on a click (or keyboard focus) and stays open: only its arrow (or Escape)
+   slides it back. Hovering only loads the layer. scripts/cube-ui.js builds the same pair when it
+   draws the tag itself. */
 function openOn(box) {
   const open = () => box.classList.add('open');
-  box.addEventListener('pointerenter', open);
+  box.addEventListener('click', open);
   box.addEventListener('focusin', open);
   box.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') box.classList.remove('open');
