@@ -248,6 +248,7 @@
       tag.append(strip, chevron);
     }
     tag.removeAttribute('tabindex');
+    tag.removeAttribute('role');
     tag.removeAttribute('aria-label');
     tag.removeAttribute('title');
 

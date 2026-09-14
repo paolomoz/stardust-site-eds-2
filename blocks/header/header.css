@@ -27,8 +27,10 @@ header .nav.hide {
   transform: translateY(-100%);
 }
 
+/* during the intro the bar waits above the viewport and slides in when the intro is done (a
+   fade would leave the CTA at partial opacity while it runs, which fails colour contrast) */
 body.introducing header .nav {
-  opacity: 0;
+  transform: translateY(-100%);
 }
 
 header .nav > * {

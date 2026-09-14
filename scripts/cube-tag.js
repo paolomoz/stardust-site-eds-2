@@ -107,6 +107,7 @@ function tag() {
   });
   box.append(strip, el('i', 'cube-tag-arrow'));
   box.tabIndex = 0;
+  box.setAttribute('role', 'group');
   box.setAttribute('aria-label', 'Turn the page');
   box.title = 'Turn the page';
   ['pointerenter', 'pointerdown', 'focus'].forEach((t) => {
