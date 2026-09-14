@@ -12,7 +12,12 @@ export const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 /* small screens get the plain layout: no pinned stages, no intro, no scroll-driven staging */
 export const mobile = window.matchMedia('(width <= 900px)').matches;
 
+/* the desktop page runs the pipeline as one scroll-driven scene (scripts/scene.js); the flag is set
+   on <html> by scripts.js before any block decorates, so blocks can leave staging to the scene */
+export const scene = document.documentElement.classList.contains('scene');
+
 const callbacks = new WeakMap();
+const deferred = new Set(); // reveal targets inside a scene layer that is not on stage yet
 let io;
 
 function ensureObserver() {
@@ -20,6 +25,13 @@ function ensureObserver() {
   io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (!e.isIntersecting) return;
+      // a layer waiting behind another screen intersects the viewport but is not seen: hold the
+      // reveal until scene.js wakes the layer
+      if (e.target.closest('.sc-layer.waiting')) {
+        io.unobserve(e.target);
+        deferred.add(e.target);
+        return;
+      }
       e.target.classList.add('in');
       const fn = callbacks.get(e.target);
       if (fn) fn(e.target);
@@ -38,6 +50,16 @@ export function observe(el, fn) {
   if (!el) return;
   if (fn) callbacks.set(el, fn);
   ensureObserver().observe(el);
+}
+
+/** Re-observes the deferred reveal targets inside `root`, so they play now (scene layers). */
+export function wake(root) {
+  deferred.forEach((el) => {
+    if (root.contains(el)) {
+      deferred.delete(el);
+      ensureObserver().observe(el);
+    }
+  });
 }
 
 /** Observes every reveal target inside `root` (data-reveal, .lines) plus any extra selector. */

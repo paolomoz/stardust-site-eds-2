@@ -1,0 +1,346 @@
+/*
+ * scene — the desktop pipeline as one scroll-driven stage (scripts/scene.js). Every rule here
+ * positions block output inside the stage; the blocks' own styles keep painting the content.
+ */
+
+.sc-wrap {
+  height: calc(var(--sc-screens, 16) * 100svh);
+  position: relative;
+}
+
+.sc-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--page);
+
+  /* the rail sits at half the gutter, like the chapters' own rail */
+  --rail-x: calc(50% - min(50%, var(--maxw) / 2) + var(--pad) / 2 - 1px);
+}
+
+.sc-stage.cubing {
+  transform-style: preserve-3d;
+}
+
+.sc-stage.cubing .sc-layer {
+  backface-visibility: hidden;
+}
+
+.sc-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.sc-layer.parked {
+  visibility: hidden;
+}
+
+/* the chapters blocks become groups: their intro and panels are layers of their own */
+.sc-stage .chapters.sc-group,
+.sc-stage .chapters.sc-group .stack {
+  display: contents;
+}
+
+.sc-stage .chapters .rail-overlay,
+.sc-stage .chapters .lane-in,
+.sc-stage .chapters .lane-tab {
+  display: none;
+}
+
+/* spotlight: fills the stage, pinned by the stage itself */
+.sc-stage .spotlight .spot-wrap {
+  height: 100%;
+}
+
+.sc-stage .spotlight .spot-pin {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+/* intro screens: the door's ground, the door's word as the title, the block's copy below */
+.sc-stage .chapters .ch-intro-block.sc-intro {
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  padding: calc(var(--nav-h) + 32px) 0 40px;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto; /* title · headline (pushed down) · copy · flow */
+  gap: 18px;
+  overflow: visible;
+}
+
+.sc-stage .chapters.redesign .ch-intro-block {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+.sc-stage .chapters.migrate .ch-intro-block {
+  background: var(--text);
+  color: var(--navy);
+}
+
+.sc-stage .sc-intro > :not(.sc-lane, .sc-tab) {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+
+.sc-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(72px, 9.5vw, 150px);
+  letter-spacing: -0.05em;
+  line-height: 0.88;
+  color: var(--navy);
+}
+
+.sc-stage .sc-intro .t-xl {
+  font-size: clamp(32px, 3.4vw, 54px);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--navy);
+  align-self: end;
+  margin-bottom: 0;
+}
+
+.sc-stage .chapters .ch-intro-block .lane-ink {
+  color: color-mix(in srgb, var(--navy) 55%, transparent);
+}
+
+.sc-stage .sc-intro .two {
+  margin-top: 0 !important;
+  align-items: end;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+}
+
+.sc-stage .sc-intro .t-lede {
+  color: color-mix(in srgb, var(--navy) 76%, transparent);
+  max-width: 52ch;
+}
+
+.sc-stage .sc-intro .aside-quote {
+  border-color: var(--navy);
+}
+
+.sc-stage .sc-intro .aside-quote p {
+  color: var(--navy);
+}
+
+.sc-stage .sc-intro .aside-quote p + p {
+  color: color-mix(in srgb, var(--navy) 60%, transparent);
+}
+
+.sc-stage .sc-intro .flow {
+  margin-top: 8px;
+}
+
+.sc-stage .sc-intro .flow .box {
+  min-height: 0;
+  padding: 16px 18px;
+}
+
+.sc-stage .sc-intro .flow .box {
+  background: var(--navy);
+  border-color: var(--navy);
+}
+
+.sc-stage .sc-intro .flow .arr {
+  color: var(--navy);
+}
+
+/* the lane continuation lives in the intro's coordinate space, one viewport to the left */
+.sc-lane {
+  position: absolute;
+  top: 0;
+  left: -100vw;
+  width: 200vw;
+  height: 100%;
+  overflow: visible;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.sc-lane-path {
+  stroke: var(--navy);
+}
+
+.sc-tab {
+  position: absolute;
+  left: calc(var(--rail-x) - 13px);
+  width: 28px;
+  padding: 14px 0;
+  display: grid;
+  place-items: center;
+  z-index: 3;
+  background: var(--navy);
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sc-stage .chapters.migrate .sc-tab {
+  color: var(--text);
+}
+
+.sc-tab b,
+.sc-rail .step b {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: 600;
+}
+
+/* panels: the block's chapter panels and the showcase, one layer each */
+.sc-stage .chapters .chapter.sc-panel {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  min-height: 0;
+  z-index: auto;
+  transform-origin: 50% 100%;
+  box-shadow: 0 -24px 70px color-mix(in srgb, var(--page) 45%, transparent);
+}
+
+.sc-stage .chapters .chapter .ch-inner {
+  height: 100%;
+}
+
+.sc-stage .showcase.sc-panel {
+  display: grid;
+  align-items: center;
+  min-height: 0;
+  padding: calc(var(--nav-h) + 24px) 0 40px;
+  background: var(--page);
+  overflow: hidden;
+  transform-origin: 50% 100%;
+}
+
+.sc-stage .showcase .container {
+  width: 100%;
+}
+
+.sc-stage .showcase .show-head {
+  margin-bottom: 28px;
+}
+
+.sc-stage .showcase .shot {
+  aspect-ratio: 16 / 9;
+  max-height: 46svh;
+}
+
+.sc-stage .install.sc-panel {
+  height: 100%;
+  min-height: 0;
+  padding-top: calc(var(--nav-h) + 24px);
+  padding-bottom: 40px;
+  overflow: hidden;
+}
+
+/* rails: a line in two segments and the step chip, above the panels, under the nav */
+.sc-probe {
+  position: absolute;
+  left: var(--rail-x);
+  top: 0;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
+
+.sc-rail {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.sc-rail.lane-a {
+  --lane: var(--gold);
+  --lane-ink: var(--navy);
+}
+
+.sc-rail.lane-b {
+  --lane: var(--text);
+  --lane-ink: var(--navy);
+}
+
+.sc-rail .line {
+  position: absolute;
+  left: var(--rail-x);
+  top: 0;
+  width: 2px;
+  display: none;
+  background: var(--lane);
+}
+
+.sc-rail .step {
+  position: absolute;
+  left: calc(var(--rail-x) - 13px);
+  top: calc(var(--nav-h) + 24px);
+  width: 28px;
+  padding: 14px 0;
+  display: grid;
+  place-items: center;
+  background: var(--lane);
+  color: var(--lane-ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+  transition:
+    opacity 0.4s,
+    transform 0.6s var(--ease-out),
+    background 0.4s,
+    color 0.4s;
+}
+
+.sc-rail .step.on {
+  opacity: 1;
+  transform: none;
+}
+
+.sc-rail .step.inverted {
+  background: var(--navy);
+  color: var(--lane);
+}
+
+/* the end station: a node like the diagram's, where the redesign lane stops */
+.sc-station {
+  position: absolute;
+  left: calc(var(--rail-x) + 1px - 9px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out) 0.3s;
+}
+
+.sc-station.on {
+  opacity: 1;
+}
+
+.sc-station .node {
+  display: block;
+  width: 18px;
+  height: 18px;
+  background: var(--gold);
+  position: relative;
+}
+
+.sc-station .node::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  background: var(--coral);
+}

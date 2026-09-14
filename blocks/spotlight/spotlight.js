@@ -12,7 +12,7 @@
  */
 
 import {
-  reveal, stagger, splitLines, onlyChild, reduced, mobile,
+  reveal, stagger, splitLines, onlyChild, reduced, mobile, scene,
 } from '../../scripts/motion.js';
 import mountWarp from './warp.js';
 
@@ -211,12 +211,17 @@ export default async function decorate(block) {
 
   // approach zoom-out (scroll-driven) + pin tween (class, time-based in CSS)
   const easeOut = (x) => 1 - (1 - x) ** 3;
+  let pinned = false;
   const update = () => {
     const vh = window.innerHeight;
     const { top } = wrap.getBoundingClientRect();
+    // in the scene the stage keeps this screen pinned and later slides and turns it: once pinned it
+    // stays pinned, and the approach zoom is done
+    if (scene && pinned) { aim(); return; }
     const a = Math.min(1, Math.max(0, (vh - top) / (vh * 0.85)));
     pin.style.setProperty('--ms', reduced ? 1 : (1.5 - 0.5 * easeOut(a)).toFixed(4));
     pin.classList.toggle('in', top <= 0);
+    if (top <= 0) pinned = true;
     aim();
   };
   window.addEventListener('scroll', update, { passive: true });

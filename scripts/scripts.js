@@ -162,6 +162,11 @@ export function decorateMain(main) {
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
   decorateTemplateAndTheme();
+  // the desktop page runs the pipeline sections as one scroll-driven scene (scripts/scene.js);
+  // decided before any block decorates so blocks can leave the staging to it
+  if (window.matchMedia('(width > 900px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
+    document.documentElement.classList.add('scene');
+  }
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
@@ -194,6 +199,10 @@ async function loadLazy(doc) {
   if (hash && element) element.scrollIntoView();
 
   loadFooter(doc.querySelector('body > footer'));
+
+  if (document.documentElement.classList.contains('scene')) {
+    import('./scene.js').then((m) => m.default(main));
+  }
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   loadFonts();

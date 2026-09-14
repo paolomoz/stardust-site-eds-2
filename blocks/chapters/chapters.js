@@ -17,7 +17,7 @@
  */
 
 import {
-  reveal, stagger, splitLines, observe, onlyChild, reduced, mobile,
+  reveal, stagger, splitLines, observe, onlyChild, reduced, mobile, scene,
 } from '../../scripts/motion.js';
 import { todayISO } from '../../scripts/seed.js';
 
@@ -391,6 +391,8 @@ export default async function decorate(block) {
   block.querySelectorAll('[data-hash]').forEach((h) => observe(h, () => rollHash(h)));
   block.querySelectorAll('[data-ba]').forEach(wireBeforeAfter);
 
+  // in the scene the stacking, the rail and the lane belong to scripts/scene.js
+  if (scene) return;
   stackedUnfold(panels);
   const step = rail.querySelector('.step');
   if (!mobile) railStep(step, panels, variant === 'migrate' ? 'light' : 'gold');

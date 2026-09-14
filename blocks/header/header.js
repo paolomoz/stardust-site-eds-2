@@ -156,7 +156,10 @@ export default async function decorate(block) {
     else if (y < lastY - 4 || y < 120) nav.classList.remove('hide');
     lastY = y;
   };
-  nav.querySelectorAll('a[href*="#"]').forEach((a) => a.addEventListener('click', () => { holdUntil = performance.now() + 1500; }));
+  // long enough for a smooth scroll across the whole scene; the scene announces its jumps
+  const hold = () => { holdUntil = performance.now() + 4000; };
+  nav.querySelectorAll('a[href*="#"]').forEach((a) => a.addEventListener('click', hold));
+  document.addEventListener('stardust:nav-jump', hold);
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
