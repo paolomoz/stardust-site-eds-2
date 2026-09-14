@@ -2,7 +2,8 @@
  * Cube palettes — one rule per cube face, see scripts/cube.js
  *
  * Chosen 2026-09-11 from palette-tests/cube-faces-2. `front` is the site's P10 palette and
- * has no rule. Rules set custom properties only.
+ * has no rule. Rules set custom properties only. The `--seed-*` tokens pick the ink and the
+ * panel that read best on each palette's seed colour (the install stage, see install.css).
  *
  *   front   P10 ink        #060a14 page, navy tiles, gold signal, coral seed   (default)
  *   right   Espresso       #1e120c page, sky-blue signal, neon coral seed
@@ -31,6 +32,9 @@
   --text-15: rgb(244 237 228 / 15%);
   --text-08: rgb(244 237 228 / 8%);
   --gold-tint: #bfdcf0;
+  --seed-ink: var(--page);
+  --seed-panel: var(--navy);
+  --seed-panel-ink: var(--text);
 }
 
 /* Sunbeam ink */
@@ -47,6 +51,9 @@
   --text-15: rgb(247 243 232 / 15%);
   --text-08: rgb(247 243 232 / 8%);
   --gold-tint: #ffe9a6;
+  --seed-ink: var(--navy);
+  --seed-panel: var(--navy);
+  --seed-panel-ink: var(--text);
 }
 
 /* Bottle · acid · pink */
@@ -63,6 +70,9 @@
   --text-15: rgb(243 246 232 / 15%);
   --text-08: rgb(243 246 232 / 8%);
   --gold-tint: #e7fa9b;
+  --seed-ink: color-mix(in srgb, var(--page) 60%, #000);
+  --seed-panel: var(--page);
+  --seed-panel-ink: var(--text);
 }
 
 /* Tangerine */
@@ -79,6 +89,9 @@
   --text-15: rgb(35 16 79 / 15%);
   --text-08: rgb(35 16 79 / 8%);
   --gold-tint: #fdf1c8;
+  --seed-ink: var(--gold-tint);
+  --seed-panel: var(--text);
+  --seed-panel-ink: var(--gold-tint);
 }
 
 /* Aubergine · lime · cyan — puzzle only */
@@ -95,4 +108,7 @@
   --text-15: rgb(246 239 251 / 15%);
   --text-08: rgb(246 239 251 / 8%);
   --gold-tint: #daf6a5;
+  --seed-ink: var(--navy);
+  --seed-panel: var(--navy);
+  --seed-panel-ink: var(--text);
 }

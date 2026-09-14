@@ -20,6 +20,12 @@
   --text-08: rgb(244 242 236 / 8%);
   --gold-tint: #fbe7be;
 
+  /* the install stage sits on the seed colour; these pick the most readable ink and panel
+     for that ground, per palette (styles/cube-palettes.css overrides them per face) */
+  --seed-ink: var(--navy);
+  --seed-panel: var(--navy);
+  --seed-panel-ink: var(--text);
+
   /* type */
   --display: "SF Pro Display", -apple-system, blinkmacsystemfont, system-ui, sans-serif;
   --body: "SF Pro Text", -apple-system, blinkmacsystemfont, system-ui, sans-serif;

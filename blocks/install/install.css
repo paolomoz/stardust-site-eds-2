@@ -1,8 +1,9 @@
-/* install — the coral stage, content inked in navy (the one place coral is a field) */
+/* install — the seed-colour stage (the one place the seed is a field). Ink and panel come from
+   the --seed-* tokens so every palette keeps its text readable on its own seed ground. */
 .install {
   position: relative;
   background: var(--coral);
-  color: var(--navy);
+  color: var(--seed-ink);
   min-height: 100svh;
   display: grid;
   align-items: center;
@@ -21,11 +22,11 @@
 }
 
 .install h2 {
-  color: var(--navy);
+  color: var(--seed-ink);
 }
 
 .install p {
-  color: color-mix(in srgb, var(--navy) 78%, transparent);
+  color: color-mix(in srgb, var(--seed-ink) 84%, transparent);
 }
 
 .install .two > div > p[data-reveal] {
@@ -40,18 +41,18 @@
 }
 
 .install a.button {
-  border-color: color-mix(in srgb, var(--navy) 35%, transparent);
-  color: var(--navy);
+  border-color: color-mix(in srgb, var(--seed-ink) 35%, transparent);
+  color: var(--seed-ink);
 }
 
 .install a.button.secondary:hover {
-  border-color: var(--navy);
+  border-color: var(--seed-ink);
 }
 
 .install a.button.primary {
-  background: var(--navy);
-  color: var(--text);
-  border-color: var(--navy);
+  background: var(--seed-panel);
+  color: var(--seed-panel-ink);
+  border-color: var(--seed-panel);
 }
 
 .install a.button.primary::after {
@@ -59,7 +60,7 @@
 }
 
 .install a.button.primary:hover {
-  color: var(--navy);
+  color: var(--seed-panel);
 }
 
 .install .credit {
@@ -67,40 +68,40 @@
 }
 
 .install .credit p {
-  color: color-mix(in srgb, var(--navy) 65%, transparent);
+  color: color-mix(in srgb, var(--seed-ink) 65%, transparent);
   font-size: 14px;
   margin: 0;
 }
 
 .install .credit a {
-  color: var(--navy);
-  border-bottom: 1px solid color-mix(in srgb, var(--navy) 45%, transparent);
+  color: var(--seed-ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--seed-ink) 45%, transparent);
 }
 
 .install .aside-quote {
-  border-color: var(--navy);
+  border-color: var(--seed-ink);
 }
 
 .install .aside-quote p {
-  color: var(--navy);
+  color: var(--seed-ink);
 }
 
 .install .aside-quote p + p {
-  color: color-mix(in srgb, var(--navy) 60%, transparent);
+  color: color-mix(in srgb, var(--seed-ink) 60%, transparent);
 }
 
 .install ::selection {
-  background: var(--navy);
+  background: var(--seed-ink);
   color: var(--coral);
 }
 
 /* terminal */
 .install .terminal {
-  background: var(--navy);
-  border: 1px solid color-mix(in srgb, var(--navy) 30%, transparent);
+  background: var(--seed-panel);
+  border: 1px solid color-mix(in srgb, var(--seed-ink) 30%, transparent);
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 40px 90px color-mix(in srgb, var(--navy) 40%, transparent);
+  box-shadow: 0 40px 90px color-mix(in srgb, var(--seed-ink) 40%, transparent);
 }
 
 .install .terminal .bar {
@@ -110,18 +111,18 @@
   align-items: center;
   gap: 8px;
   padding: 0 14px;
-  border-bottom: 1px solid var(--text-08);
+  border-bottom: 1px solid color-mix(in srgb, var(--seed-panel-ink) 8%, transparent);
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.08em;
-  color: var(--text-40);
+  color: color-mix(in srgb, var(--seed-panel-ink) 40%, transparent);
 }
 
 .install .terminal .bar i {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--text-15);
+  background: color-mix(in srgb, var(--seed-panel-ink) 15%, transparent);
 }
 
 .install .terminal .bar span {
@@ -133,15 +134,15 @@
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-55);
+  color: color-mix(in srgb, var(--seed-panel-ink) 55%, transparent);
   padding: 3px 8px;
-  border: 1px solid var(--text-15);
+  border: 1px solid color-mix(in srgb, var(--seed-panel-ink) 15%, transparent);
   border-radius: 2px;
 }
 
 .install .terminal .skip:hover {
-  color: var(--text);
-  border-color: var(--text-40);
+  color: var(--seed-panel-ink);
+  border-color: color-mix(in srgb, var(--seed-panel-ink) 40%, transparent);
 }
 
 .install .terminal pre {
@@ -154,7 +155,7 @@
 }
 
 .install .terminal .p {
-  color: var(--text-40);
+  color: color-mix(in srgb, var(--seed-panel-ink) 40%, transparent);
 }
 
 .install .terminal .c {
@@ -162,7 +163,7 @@
 }
 
 .install .terminal .d {
-  color: var(--text-55);
+  color: color-mix(in srgb, var(--seed-panel-ink) 55%, transparent);
 }
 
 .install .terminal .cursor {
@@ -215,5 +216,5 @@
   text-transform: uppercase;
   line-height: 1;
   margin: 0;
-  color: color-mix(in srgb, var(--navy) 60%, transparent);
+  color: color-mix(in srgb, var(--seed-ink) 60%, transparent);
 }
