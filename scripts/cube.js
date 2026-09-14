@@ -111,8 +111,11 @@ function saveOrientation() {
  */
 function setPalette(face) {
   const root = document.documentElement;
+  const next = face && !faceBuilders[face] ? face : null;
+  // nothing to switch: scripts/cube-tag.js may have restored the face before this ran
+  if (root.getAttribute(ATTR) === next) return;
   root.classList.add('cube-switching');
-  if (face && !faceBuilders[face]) root.setAttribute(ATTR, face);
+  if (next) root.setAttribute(ATTR, next);
   else root.removeAttribute(ATTR);
   requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('cube-switching')));
 }

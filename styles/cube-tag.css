@@ -1,0 +1,111 @@
+/*
+ * Cube layer — the tag, closed state. See scripts/cube-tag.js
+ *
+ * The slim tab on the right edge is the only piece of the cube layer on the page until the
+ * visitor reaches for it; the rest (cube.css, cube-ui.css, cube-rubik.css and the scripts)
+ * loads on first activation. Everything the widget adds inside the open tag is styled in
+ * cube-ui.css.
+ */
+
+:root {
+  --cube-tag-width: 26px;
+  --cube-tag-height: 72px;
+  --cube-tag-open: 132px;
+}
+
+/* the tag: a slim tab on the right edge at mid-height. The panel is always as wide as its open
+   size; closed it is slid right so only a strip peeks out. Opening slides it in and grows it. */
+.cube-tag {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  z-index: 2147483200; /* above the turn overlay: the widget mirrors the turn live */
+  width: var(--cube-tag-open);
+  height: var(--cube-tag-height);
+  transform: translate(calc(var(--cube-tag-open) - var(--cube-tag-width)), -50%);
+  background: rgb(40 40 44 / 50%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-right: 0;
+  border-radius: 4px 0 0 4px;
+  color: var(--text, #f4f2ec);
+  touch-action: none;
+  user-select: none;
+  transition:
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s,
+    height 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s,
+    opacity 0.6s;
+}
+
+.cube-tag:hover,
+.cube-tag:focus-within,
+.cube-tag.dragging,
+.cube-tag.open {
+  transform: translate(0, -50%);
+  height: var(--cube-tag-open);
+  transition-delay: 0s;
+  transition-duration: 0.55s;
+}
+
+/* hidden until the page has loaded */
+.cube-tag:not(.show) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* the strip: the five other faces' seed colours along the visible edge, full tab height */
+.cube-tag-strip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 3px 0 0 3px;
+  overflow: hidden;
+  opacity: 0.9;
+}
+
+.cube-tag-swatch {
+  flex: 1;
+  background: var(--coral);
+}
+
+/* chevron in the peeking strip: points left, "pull this out" */
+.cube-tag-arrow {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border: solid currentcolor;
+  border-width: 1.5px 0 0 1.5px;
+  transform: rotate(-45deg);
+  opacity: 0.75;
+  transition: opacity 0.25s 0.3s;
+  animation: cube-tag-nudge 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@keyframes cube-tag-nudge {
+  0%,
+  100% { translate: 0 0; }
+  50% { translate: -3px 0; }
+}
+
+.cube-tag:hover .cube-tag-arrow,
+.cube-tag:focus-within .cube-tag-arrow,
+.cube-tag.dragging .cube-tag-arrow,
+.cube-tag.open .cube-tag-arrow {
+  opacity: 0;
+  animation: none;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cube-tag-arrow {
+    animation: none;
+  }
+}

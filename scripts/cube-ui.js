@@ -234,15 +234,22 @@
   /* ---------------------------------------------------------------- widget */
 
   function widget() {
-    const tag = el('div', 'cube-tag');
-    const strip = el('div', 'cube-tag-strip');
-    ['right', 'left', 'top', 'bottom', 'back'].forEach((name) => {
-      const swatch = el('i', 'cube-tag-swatch');
-      swatch.setAttribute('data-cube-face', name);
-      strip.append(swatch);
-    });
-    const chevron = el('i', 'cube-tag-arrow');
-    tag.append(strip, chevron);
+    // the closed tag is usually already on the page, drawn by scripts/cube-tag.js
+    const existing = document.querySelector('.cube-tag');
+    const tag = existing || el('div', 'cube-tag');
+    if (!existing) {
+      const strip = el('div', 'cube-tag-strip');
+      ['right', 'left', 'top', 'bottom', 'back'].forEach((name) => {
+        const swatch = el('i', 'cube-tag-swatch');
+        swatch.setAttribute('data-cube-face', name);
+        strip.append(swatch);
+      });
+      const chevron = el('i', 'cube-tag-arrow');
+      tag.append(strip, chevron);
+    }
+    tag.removeAttribute('tabindex');
+    tag.removeAttribute('aria-label');
+    tag.removeAttribute('title');
 
     const box = el('div', 'cube-widget');
     box.tabIndex = 0;
@@ -303,7 +310,7 @@
         mini.style.transform = BASE;
       }
     };
-    tag.addEventListener('pointerenter', () => {
+    const arrive = () => {
       if (reduceMotion() || cube.isBusy() || demo) return;
       demoTimer = setTimeout(() => {
         if (cube.isBusy()) return;
@@ -316,7 +323,8 @@
         ], { duration: DEMO_DURATION, easing: 'linear' });
         demo.finished.then(() => { demo = null; }).catch(() => {});
       }, DEMO_DELAY);
-    });
+    };
+    tag.addEventListener('pointerenter', arrive);
 
     document.addEventListener('cube:scrub', (e) => { demoCancel(); mini.style.transform = pose(e.detail); });
     document.addEventListener('cube:turning', (e) => {
@@ -354,8 +362,11 @@
       if (!tag.contains(e.target)) tag.classList.remove('open');
     });
 
-    document.body.append(tag);
+    if (!existing) document.body.append(tag);
     requestAnimationFrame(() => { place(); rest(); });
+    // loaded by the pointer arriving on the tag: the arrival already happened
+    if (existing && document.activeElement === tag) box.focus();
+    if (existing && (tag.matches(':hover') || tag.contains(document.activeElement))) arrive();
     return tag;
   }
 
