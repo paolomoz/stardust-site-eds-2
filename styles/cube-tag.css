@@ -11,40 +11,74 @@
   --cube-tag-width: 26px;
   --cube-tag-height: 72px;
   --cube-tag-open: 132px;
+
+  /* the closed tag is the open panel clipped to the tab height, centred */
+  --cube-tag-trim: calc((var(--cube-tag-open) - var(--cube-tag-height)) / 2);
+  --cube-tag-line: rgb(255 255 255 / 12%);
 }
 
-/* the tag: a slim tab on the right edge at mid-height. The panel is always as wide as its open
-   size; closed it is slid right so only a strip peeks out. Opening slides it in and grows it. */
+/* the tag: a slim tab on the right edge at mid-height. The panel is always its open size; closed
+   it is slid right so only a strip peeks out, and clipped top and bottom to the tab height.
+   Opening slides it in and lets the clip go: transform and clip-path only, no layout in the
+   animation. It opens on hover or focus and stays open until its arrow is clicked. */
 .cube-tag {
   position: fixed;
   right: 0;
   top: 50%;
   z-index: 2147483200; /* above the turn overlay: the widget mirrors the turn live */
   width: var(--cube-tag-open);
-  height: var(--cube-tag-height);
+  height: var(--cube-tag-open);
   transform: translate(calc(var(--cube-tag-open) - var(--cube-tag-width)), -50%);
+  clip-path: inset(var(--cube-tag-trim) 0 round 4px 0 0 4px);
   background: rgb(40 40 44 / 50%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-right: 0;
+  border-left: 1px solid var(--cube-tag-line);
   border-radius: 4px 0 0 4px;
   color: var(--text, #f4f2ec);
   touch-action: none;
   user-select: none;
   transition:
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s,
-    height 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s,
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    clip-path 0.7s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 0.6s;
 }
 
-.cube-tag:hover,
-.cube-tag:focus-within,
 .cube-tag.dragging,
 .cube-tag.open {
   transform: translate(0, -50%);
-  height: var(--cube-tag-open);
-  transition-delay: 0s;
+  clip-path: inset(0 round 4px 0 0 4px);
+  transition-duration: 0.55s;
+}
+
+/* top and bottom hairlines: the clip would cut a border away, so they are drawn as lines that
+   ride with the clipped edges */
+.cube-tag::before,
+.cube-tag::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--cube-tag-line);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cube-tag::before {
+  top: 0;
+  transform: translateY(var(--cube-tag-trim));
+}
+
+.cube-tag::after {
+  bottom: 0;
+  transform: translateY(calc(-1 * var(--cube-tag-trim)));
+}
+
+.cube-tag.dragging::before,
+.cube-tag.dragging::after,
+.cube-tag.open::before,
+.cube-tag.open::after {
+  transform: none;
   transition-duration: 0.55s;
 }
 
@@ -54,7 +88,8 @@
   pointer-events: none;
 }
 
-/* the strip: the five other faces' seed colours along the visible edge, full tab height */
+/* the strip: the five other faces' seed colours along the visible edge, the full height of the
+   tab closed and of the panel open (the clip does the rest) */
 .cube-tag-strip {
   position: absolute;
   left: 0;
@@ -95,13 +130,63 @@
   50% { translate: -3px 0; }
 }
 
-.cube-tag:hover .cube-tag-arrow,
-.cube-tag:focus-within .cube-tag-arrow,
 .cube-tag.dragging .cube-tag-arrow,
 .cube-tag.open .cube-tag-arrow {
   opacity: 0;
   animation: none;
   transition-delay: 0s;
+}
+
+/* the collapse arrow: in the open panel, where the tab lane was, pointing right, "push this
+   back". The only way the panel closes (with Escape). */
+.cube-tag-close {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: var(--cube-tag-width);
+  height: 44px;
+  margin-top: -22px;
+  z-index: 1; /* above the widget box, which fills the panel */
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.cube-tag-close::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -7px;
+  border: solid currentcolor;
+  border-width: 1.5px 1.5px 0 0;
+  transform: rotate(45deg);
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.cube-tag-close:hover::before,
+.cube-tag-close:focus-visible::before {
+  opacity: 1;
+}
+
+.cube-tag-close:focus-visible {
+  outline: 1px solid var(--gold, #f7ca6e);
+  outline-offset: -4px;
+}
+
+.cube-tag.dragging .cube-tag-close,
+.cube-tag.open .cube-tag-close {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 0.35s;
 }
 
 @media (prefers-reduced-motion: reduce) {

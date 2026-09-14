@@ -15,10 +15,11 @@
  *   - Widget: a slim tag on the right edge at mid-height, with a strip of the five face colours
  *     and a chevron. Hovering (or tapping, on touch) slides it open into a panel holding a small
  *     live cube whose faces are miniatures of the pages in their palettes; it mirrors the
- *     orientation, plays one slow demo turn on arrival, and is dragged to turn the page. On mouse
- *     out the panel slides back into the edge while the cube keeps moving. Focus it and use the
- *     arrow keys. Keys use "look" semantics: the right arrow shows the face on the right. The
- *     tag is the cube's discoverability element: nothing interrupts the first screen.
+ *     orientation, plays one slow demo turn on arrival, and is dragged to turn the page. The
+ *     panel stays open until its collapse arrow is clicked (or Escape); then it slides back into
+ *     the edge while the cube keeps moving. Focus it and use the arrow keys. Keys use "look"
+ *     semantics: the right arrow shows the face on the right. The tag is the cube's
+ *     discoverability element: nothing interrupts the first screen.
  *
  * Alt + arrow keys turn as well, with the same look semantics.
  */
@@ -245,7 +246,22 @@
         strip.append(swatch);
       });
       const chevron = el('i', 'cube-tag-arrow');
-      tag.append(strip, chevron);
+      const close = el('button', 'cube-tag-close');
+      close.type = 'button';
+      close.setAttribute('aria-label', 'Put the cube away');
+      close.title = 'Put the cube away';
+      close.addEventListener('click', (e) => {
+        e.stopPropagation();
+        tag.classList.remove('open');
+      });
+      tag.append(strip, chevron, close);
+      // same as scripts/cube-tag.js: opens on arrival, closes only from the arrow or Escape
+      const open = () => tag.classList.add('open');
+      tag.addEventListener('pointerenter', open);
+      tag.addEventListener('focusin', open);
+      tag.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') tag.classList.remove('open');
+      });
     }
     tag.removeAttribute('tabindex');
     tag.removeAttribute('role');
@@ -351,16 +367,6 @@
       if (!side || e.altKey || e.metaKey || e.ctrlKey) return;
       e.preventDefault();
       cube.rotate(LOOK[side]);
-    });
-
-    // touch has no hover: a tap on the closed tag opens it, a tap elsewhere closes it
-    tag.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'mouse' || tag.classList.contains('open')) return;
-      e.preventDefault();
-      tag.classList.add('open');
-    });
-    document.addEventListener('pointerdown', (e) => {
-      if (!tag.contains(e.target)) tag.classList.remove('open');
     });
 
     if (!existing) document.body.append(tag);
