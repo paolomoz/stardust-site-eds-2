@@ -4,9 +4,15 @@
  *   mountHero(canvas) -> { destroy(), pointer, setLogo(cx, cy), setEnergy(e) }
  * `pointer` is the eased pointer {x, y} in 0..1 so the DOM layer (mark + wordmark) can move
  * with the gas. Colours come from the tokens through scripts/palette.js and follow the cube.
+ * `canvas` is the element currently drawn on: the renderer swaps it for a fresh one when it
+ * falls back from WebGL to 2D (a canvas holds one kind of context for life).
+ *
+ * WebGL is skipped on software renderers and the shader compiles off the main thread
+ * (scripts/gl.js); if the shader fails or the frame rate cannot be held, the 2D field takes over.
  */
 
 import { subscribePalette } from '../../scripts/palette.js';
+import { softwareGL, buildProgram, slowFrames } from '../../scripts/gl.js';
 
 const VERT = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0., 1.); }';
 
@@ -95,66 +101,78 @@ void main(){
 
 const UNIFORMS = ['u_res', 'u_time', 'u_mouse', 'u_scroll', 'u_page', 'u_navy', 'u_glow', 'u_gold', 'u_text', 'u_coral', 'u_logo', 'u_energy'];
 
-function compile(gl, type, src) {
-  const s = gl.createShader(type);
-  gl.shaderSource(s, src);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-    // eslint-disable-next-line no-console
-    console.error(gl.getShaderInfoLog(s));
-    return null;
-  }
-  return s;
-}
-
-function mountGL(canvas, pointer, state, reduced) {
+/**
+ * The nebula. Draws nothing until the program is ready (the canvas shows the page colour
+ * meanwhile); calls `onFail` if the shader does not link or the frames come too slowly.
+ * @returns {{ destroy() }|null} null when WebGL is unavailable
+ */
+function mountGL(canvas, pointer, state, reduced, onFail) {
   const gl = canvas.getContext('webgl', {
     antialias: false, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: true,
   });
   if (!gl) return null;
-  const vs = compile(gl, gl.VERTEX_SHADER, VERT);
-  const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
-  if (!vs || !fs) return null;
-  const prog = gl.createProgram();
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
-  gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
-  gl.useProgram(prog);
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-  const a = gl.getAttribLocation(prog, 'a');
-  gl.enableVertexAttribArray(a);
-  gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-  const U = {};
-  UNIFORMS.forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
-  const unsub = subscribePalette((p) => {
-    gl.uniform3fv(U.u_page, p.page);
-    gl.uniform3fv(U.u_navy, p.navy);
-    gl.uniform3fv(U.u_glow, p.glow);
-    gl.uniform3fv(U.u_gold, p.gold);
-    gl.uniform3fv(U.u_text, p.text);
-    gl.uniform3fv(U.u_coral, p.coral);
-  });
 
+  let prog = null;
+  let palette = null;
   let raf = 0;
   let running = true;
+  let failed = false;
   let scroll = 0;
+  const U = {};
+  const slow = slowFrames();
   const t0 = performance.now();
   // render at reduced resolution: fbm x5 per pixel is the cost
   const scale = Math.min(window.devicePixelRatio || 1, 2) * (window.innerWidth > 1600 ? 0.6 : 0.75);
+
+  // the CSS size comes from a ResizeObserver: reading clientWidth in the frame would force layout
+  let cw = canvas.clientWidth;
+  let ch = canvas.clientHeight;
+  const ro = new ResizeObserver(([entry]) => {
+    cw = entry.contentRect.width;
+    ch = entry.contentRect.height;
+  });
+  ro.observe(canvas);
   const resize = () => {
-    const w = Math.max(1, Math.round(canvas.clientWidth * scale));
-    const h = Math.max(1, Math.round(canvas.clientHeight * scale));
+    const w = Math.max(1, Math.round(cw * scale));
+    const h = Math.max(1, Math.round(ch * scale));
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
       gl.viewport(0, 0, w, h);
     }
   };
+  const fail = () => {
+    if (failed) return;
+    failed = true;
+    running = false;
+    onFail();
+  };
+  const paintPage = () => {
+    // the page colour until the shader is ready: nothing flashes
+    resize();
+    gl.clearColor(palette.page[0], palette.page[1], palette.page[2], 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  };
+  const setColours = () => {
+    gl.uniform3fv(U.u_page, palette.page);
+    gl.uniform3fv(U.u_navy, palette.navy);
+    gl.uniform3fv(U.u_glow, palette.glow);
+    gl.uniform3fv(U.u_gold, palette.gold);
+    gl.uniform3fv(U.u_text, palette.text);
+    gl.uniform3fv(U.u_coral, palette.coral);
+  };
+  const unsub = subscribePalette((p) => {
+    palette = p;
+    if (prog) setColours();
+    else paintPage();
+  });
+
   const frame = (now) => {
     if (!running) return;
+    if (!reduced && slow(now)) {
+      fail();
+      return;
+    }
     resize();
     pointer.tick();
     gl.uniform2f(U.u_res, canvas.width, canvas.height);
@@ -168,23 +186,41 @@ function mountGL(canvas, pointer, state, reduced) {
   };
   const onScroll = () => {
     scroll = Math.min(1, window.scrollY / window.innerHeight);
-    if (reduced) frame(performance.now());
+    if (reduced && prog) frame(performance.now());
   };
   const onVis = () => {
-    running = !document.hidden;
-    if (running && !reduced) raf = requestAnimationFrame(frame);
+    running = !document.hidden && !failed;
+    if (running && prog && !reduced) raf = requestAnimationFrame(frame);
   };
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', resize, { passive: true });
   document.addEventListener('visibilitychange', onVis);
-  raf = requestAnimationFrame(frame);
+
+  buildProgram(gl, VERT, FRAG).then((p) => {
+    if (!running) return;
+    if (!p) {
+      fail();
+      return;
+    }
+    prog = p;
+    gl.useProgram(prog);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const a = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(a);
+    gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+    UNIFORMS.forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
+    setColours();
+    raf = requestAnimationFrame(frame);
+  });
+
   return {
     destroy() {
       running = false;
       unsub();
       cancelAnimationFrame(raf);
+      ro.disconnect();
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', onVis);
       const lose = gl.getExtension('WEBGL_lose_context');
       if (lose) lose.loseContext();
@@ -192,9 +228,9 @@ function mountGL(canvas, pointer, state, reduced) {
   };
 }
 
-/* 2D fallback: the dust field */
-function mount2D(canvas, pointer, reduced) {
-  const ctx = canvas.getContext('2d', { alpha: false });
+/* 2D fallback: the dust field. `cpu` keeps the canvas off the GPU process (software renderers). */
+function mount2D(canvas, pointer, reduced, cpu = false) {
+  const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: cpu });
   let w = 0;
   let h = 0;
   let raf = 0;
@@ -292,20 +328,51 @@ export default function mountHero(canvas, opts = {}) {
   };
   window.addEventListener('pointermove', onMove, { passive: true });
   document.documentElement.addEventListener('pointerleave', onLeave);
-  const gl = opts.force2d ? null : mountGL(canvas, pointer, state, reduced);
-  const inner = gl || mount2D(canvas, pointer, reduced);
-  canvas.dataset.renderer = gl ? 'webgl' : '2d';
+
+  let cv = canvas;
+  let inner = null;
+  let cpu = false;
+  const use2D = () => {
+    inner = mount2D(cv, pointer, reduced, cpu);
+    cv.dataset.renderer = '2d';
+  };
+  // WebGL gave up after taking the canvas: a fresh element for the 2D context
+  const fallBack = () => {
+    if (inner) inner.destroy();
+    const fresh = cv.cloneNode(false);
+    fresh.removeAttribute('width');
+    fresh.removeAttribute('height');
+    cv.replaceWith(fresh);
+    cv = fresh;
+    use2D();
+  };
+  let destroyed = false;
+  // the canvas stays blank (the stage colour) until the renderer is known
+  if (opts.force2d) {
+    use2D();
+  } else {
+    softwareGL().then((software) => {
+      if (destroyed) return;
+      cpu = software;
+      if (!software) inner = mountGL(cv, pointer, state, reduced, fallBack);
+      if (inner) cv.dataset.renderer = 'webgl';
+      else use2D();
+    });
+  }
+
   return {
     pointer,
+    get canvas() { return cv; },
     /** logo centre in canvas pixels → shader uv space (centred, y up, normalised by height) */
     setLogo(cx, cy) {
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
+      const w = cv.clientWidth;
+      const h = cv.clientHeight;
       state.logo = [(cx - w / 2) / h, (h / 2 - cy) / h];
     },
     setEnergy(e) { state.energy = e; },
     destroy() {
-      inner.destroy();
+      destroyed = true;
+      if (inner) inner.destroy();
       window.removeEventListener('pointermove', onMove);
       document.documentElement.removeEventListener('pointerleave', onLeave);
     },

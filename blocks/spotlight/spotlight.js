@@ -205,7 +205,7 @@ export default async function decorate(block) {
   const aim = () => {
     if (!root) return;
     const r = root.getBoundingClientRect();
-    const c = canvas.getBoundingClientRect();
+    const c = warp.canvas.getBoundingClientRect();
     warp.setFocus(r.left + r.width / 2 - c.left, r.top + r.height / 2 - c.top);
   };
 

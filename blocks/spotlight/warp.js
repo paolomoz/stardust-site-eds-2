@@ -2,13 +2,17 @@
  * stardust warp — onboard camera through a starfield (WebGL). Stars stream toward the viewer
  * from a vanishing point (the mark), streaking with speed; soft sky objects drift past in
  * parallax. Contract:
- *   mountWarp(canvas, opts) -> { destroy(), setFocus(x, y), setSpeed(v) }
- * Falls back to a static navy gradient when WebGL is missing. Colours come from the P10 tokens
- * through scripts/palette.js, so the cube layer recolours the field when it changes face.
+ *   mountWarp(canvas, opts) -> { destroy(), setFocus(x, y), setSpeed(v), canvas }
+ * Falls back to a static navy gradient when WebGL is missing, software rendered, fails to
+ * compile or cannot hold the frame rate (scripts/gl.js); `canvas` is the element currently in
+ * use, since the fallback needs a fresh one once WebGL has taken the original. Colours come from
+ * the P10 tokens through scripts/palette.js, so the cube layer recolours the field when it
+ * changes face.
  */
 
 import { subscribePalette } from '../../scripts/palette.js';
 import { reduced } from '../../scripts/motion.js';
+import { softwareGL, buildProgram, slowFrames } from '../../scripts/gl.js';
 
 const VERT = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0., 1.); }';
 
@@ -78,76 +82,74 @@ void main(){
 
 const UNIFORMS = ['u_res', 'u_time', 'u_focus', 'u_speed', 'u_fade', 'PAGE', 'NAVY', 'GLOW', 'GOLD', 'TEXT', 'CORAL'];
 
-function compile(gl, type, src) {
-  const s = gl.createShader(type);
-  gl.shaderSource(s, src);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-    // eslint-disable-next-line no-console
-    console.error(gl.getShaderInfoLog(s));
-    return null;
-  }
-  return s;
-}
+const GRADIENT = 'radial-gradient(ellipse at 30% 45%, var(--glow), var(--page) 70%)';
 
-/**
- * @param {HTMLCanvasElement} canvas
- * @param {{ speed?: number }} [opts]
- */
-export default function mountWarp(canvas, opts = {}) {
+/** The starfield. Calls `onFail` if the shader does not link or the frames come too slowly. */
+function mountGL(canvas, state, onFail) {
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false, preserveDrawingBuffer: true });
-  const state = {
-    focus: [0.3, 0.55], speed: opts.speed || 0.9, targetSpeed: opts.speed || 0.9, fade: 1,
-  };
-  if (!gl) {
-    canvas.style.background = 'radial-gradient(ellipse at 30% 45%, var(--glow), var(--page) 70%)';
-    canvas.dataset.renderer = '2d';
-    return { destroy() {}, setFocus() {}, setSpeed() {} };
-  }
-  const vs = compile(gl, gl.VERTEX_SHADER, VERT);
-  const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
-  const prog = gl.createProgram();
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
-  gl.linkProgram(prog);
-  gl.useProgram(prog);
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-  const a = gl.getAttribLocation(prog, 'a');
-  gl.enableVertexAttribArray(a);
-  gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-  const U = {};
-  UNIFORMS.forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
-  const unsub = subscribePalette((p) => {
-    gl.uniform3fv(U.PAGE, p.page);
-    gl.uniform3fv(U.NAVY, p.navy);
-    gl.uniform3fv(U.GLOW, p.glow);
-    gl.uniform3fv(U.GOLD, p.gold);
-    gl.uniform3fv(U.TEXT, p.text);
-    gl.uniform3fv(U.CORAL, p.coral);
-  });
-  canvas.dataset.renderer = 'webgl';
+  if (!gl) return null;
 
+  let prog = null;
+  let palette = null;
   let raf = 0;
   let running = true;
+  let failed = false;
   let visible = true;
+  const U = {};
+  const slow = slowFrames();
   const t0 = performance.now();
   const scale = Math.min(window.devicePixelRatio || 1, 2) * 0.7;
 
+  // the CSS size comes from a ResizeObserver: reading clientWidth in the frame would force layout
+  let cw = canvas.clientWidth;
+  let ch = canvas.clientHeight;
+  const ro = new ResizeObserver(([entry]) => {
+    cw = entry.contentRect.width;
+    ch = entry.contentRect.height;
+  });
+  ro.observe(canvas);
   function resize() {
-    const w = Math.max(1, Math.round(canvas.clientWidth * scale));
-    const h = Math.max(1, Math.round(canvas.clientHeight * scale));
+    const w = Math.max(1, Math.round(cw * scale));
+    const h = Math.max(1, Math.round(ch * scale));
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
       gl.viewport(0, 0, w, h);
     }
   }
+  const fail = () => {
+    if (failed) return;
+    failed = true;
+    running = false;
+    onFail();
+  };
+  const setColours = () => {
+    gl.uniform3fv(U.PAGE, palette.page);
+    gl.uniform3fv(U.NAVY, palette.navy);
+    gl.uniform3fv(U.GLOW, palette.glow);
+    gl.uniform3fv(U.GOLD, palette.gold);
+    gl.uniform3fv(U.TEXT, palette.text);
+    gl.uniform3fv(U.CORAL, palette.coral);
+  };
+  const unsub = subscribePalette((p) => {
+    palette = p;
+    if (prog) {
+      setColours();
+    } else {
+      // the page colour until the shader is ready
+      resize();
+      gl.clearColor(p.page[0], p.page[1], p.page[2], 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
+  });
 
   function frame(now) {
     if (!running) return;
     if (visible) {
+      if (!reduced && slow(now)) {
+        fail();
+        return;
+      }
       resize();
       state.speed += (state.targetSpeed - state.speed) * 0.04;
       gl.uniform2f(U.u_res, canvas.width, canvas.height);
@@ -162,24 +164,86 @@ export default function mountWarp(canvas, opts = {}) {
 
   const io = new IntersectionObserver((es) => { visible = es[0].isIntersecting; }, { rootMargin: '20% 0px' });
   io.observe(canvas);
-  window.addEventListener('resize', resize, { passive: true });
-  raf = requestAnimationFrame(frame);
+
+  buildProgram(gl, VERT, FRAG).then((p) => {
+    if (!running) return;
+    if (!p) {
+      fail();
+      return;
+    }
+    prog = p;
+    gl.useProgram(prog);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const a = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(a);
+    gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+    UNIFORMS.forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
+    setColours();
+    raf = requestAnimationFrame(frame);
+  });
 
   return {
-    /** vanishing point in canvas pixels (top-left origin) */
-    setFocus(cx, cy) {
-      state.focus = [cx / canvas.clientWidth, 1 - cy / canvas.clientHeight];
-      if (reduced) frame(performance.now());
-    },
-    setSpeed(v) { state.targetSpeed = v; },
+    /** one frame on demand (reduced motion) */
+    draw() { if (prog) frame(performance.now()); },
     destroy() {
       running = false;
       unsub();
       cancelAnimationFrame(raf);
       io.disconnect();
-      window.removeEventListener('resize', resize);
+      ro.disconnect();
       const lose = gl.getExtension('WEBGL_lose_context');
       if (lose) lose.loseContext();
+    },
+  };
+}
+
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {{ speed?: number }} [opts]
+ */
+export default function mountWarp(canvas, opts = {}) {
+  const state = {
+    focus: [0.3, 0.55], speed: opts.speed || 0.9, targetSpeed: opts.speed || 0.9, fade: 1,
+  };
+  let cv = canvas;
+  let inner = null;
+  const useGradient = () => {
+    cv.style.background = GRADIENT;
+    cv.dataset.renderer = '2d';
+  };
+  // WebGL gave up after taking the canvas: a fresh element for the gradient
+  const fallBack = () => {
+    if (inner) inner.destroy();
+    inner = null;
+    const fresh = cv.cloneNode(false);
+    fresh.removeAttribute('width');
+    fresh.removeAttribute('height');
+    cv.replaceWith(fresh);
+    cv = fresh;
+    useGradient();
+  };
+  let destroyed = false;
+  // the canvas stays blank (the stage colour) until the renderer is known
+  softwareGL().then((software) => {
+    if (destroyed) return;
+    if (!software) inner = mountGL(cv, state, fallBack);
+    if (inner) cv.dataset.renderer = 'webgl';
+    else useGradient();
+  });
+
+  return {
+    get canvas() { return cv; },
+    /** vanishing point in canvas pixels (top-left origin) */
+    setFocus(cx, cy) {
+      state.focus = [cx / cv.clientWidth, 1 - cy / cv.clientHeight];
+      if (reduced && inner) inner.draw();
+    },
+    setSpeed(v) { state.targetSpeed = v; },
+    destroy() {
+      destroyed = true;
+      if (inner) inner.destroy();
     },
   };
 }

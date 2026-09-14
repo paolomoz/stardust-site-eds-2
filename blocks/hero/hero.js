@@ -181,7 +181,7 @@ export default async function decorate(block) {
       hero.setEnergy(energy);
       block.style.setProperty('--energy', energy.toFixed(3));
       const r = lockup.getBoundingClientRect();
-      const cr = canvas.getBoundingClientRect();
+      const cr = hero.canvas.getBoundingClientRect();
       hero.setLogo(r.left + r.width / 2 - cr.left, r.top + r.height / 2 - cr.top + 10);
       requestAnimationFrame(sync);
     };
