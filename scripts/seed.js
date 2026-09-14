@@ -65,3 +65,26 @@ export function todayISO() {
 export function seedHash(name) {
   return md5(`${name} · ${todayISO()}`).slice(0, 8);
 }
+
+/**
+ * Calls `fn` at the next local midnight and every midnight after, so a page left open keeps
+ * showing today's seed. Also catches up when a sleeping tab wakes on a new day.
+ * @param {Function} fn
+ */
+export function onNewDay(fn) {
+  let day = todayISO();
+  const check = () => {
+    const now = todayISO();
+    if (now !== day) {
+      day = now;
+      fn();
+    }
+  };
+  const schedule = () => {
+    const d = new Date();
+    const next = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1, 0, 0, 1);
+    setTimeout(() => { check(); schedule(); }, next - d);
+  };
+  schedule();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+}

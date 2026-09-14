@@ -11,7 +11,7 @@
 import { getMetadata } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
 import { reveal, plus, onlyChild } from '../../scripts/motion.js';
-import { seedHash, todayISO } from '../../scripts/seed.js';
+import { seedHash, todayISO, onNewDay } from '../../scripts/seed.js';
 
 const el = (tag, className) => {
   const n = document.createElement(tag);
@@ -47,7 +47,9 @@ export default async function decorate(block) {
     const first = kids.shift();
     if (first) right.append(first);
     const hash = el('span', 'hash');
-    hash.textContent = `md5("stardust" · ${todayISO()}) → ${seedHash('stardust')}`;
+    const line = () => `md5("stardust" · ${todayISO()}) → ${seedHash('stardust')}`;
+    hash.textContent = line();
+    onNewDay(() => { hash.textContent = line(); });
     right.append(hash, ...kids);
   }
   meta.append(right);

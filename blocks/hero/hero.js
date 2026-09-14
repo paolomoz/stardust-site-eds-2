@@ -14,7 +14,7 @@
 
 import mountHero from './nebula.js';
 import { splitLines, reduced, mobile } from '../../scripts/motion.js';
-import { seedHash, todayISO } from '../../scripts/seed.js';
+import { seedHash, todayISO, onNewDay } from '../../scripts/seed.js';
 
 const MARK = `<svg class="hero-mark" viewBox="0 0 280 280" data-reveal="scale" style="--i:1" aria-hidden="true">
   <g class="f-gold">
@@ -59,7 +59,10 @@ function accentPeriod(heading) {
 function decorateSeed(p) {
   const label = p.querySelector('strong');
   const hash = el('span', 'hash');
-  hash.append(`md5("brand" · ${todayISO()}) → ${seedHash('brand')} ·`);
+  const line = () => `md5("brand" · ${todayISO()}) → ${seedHash('brand')} ·`;
+  const seedText = document.createTextNode(line());
+  hash.append(seedText);
+  onNewDay(() => { seedText.nodeValue = line(); });
   const rest = [...p.childNodes].filter((n) => n !== label);
   if (rest[0] && !/^\s/.test(rest[0].textContent)) hash.append(' ');
   hash.append(...rest);
