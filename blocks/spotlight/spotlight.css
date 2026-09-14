@@ -272,7 +272,7 @@
 
 .spotlight .stile .short .label {
   display: block;
-  color: color-mix(in srgb, var(--navy) 55%, transparent);
+  color: color-mix(in srgb, var(--navy) 72%, transparent); /* 5.5:1 on the gold door */
   margin-bottom: 6px;
 }
 

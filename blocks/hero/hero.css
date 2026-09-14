@@ -218,7 +218,7 @@
   display: flex;
   gap: 22px;
   align-items: center;
-  color: color-mix(in srgb, var(--navy) 50%, transparent);
+  color: color-mix(in srgb, var(--navy) 70%, transparent); /* 5.9:1 on the text ground */
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.1em;
