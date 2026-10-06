@@ -8,7 +8,9 @@
  */
 
 :root {
-  --cube-tag-width: 26px;
+  /* wide enough that the chevron sits clear of the right-edge lane where macOS overlay
+     scrollbars live (~16px): a click there grabs the scrollbar instead of opening the tag */
+  --cube-tag-width: 44px;
   --cube-tag-height: 72px;
   --cube-tag-open: 132px;
 
@@ -110,10 +112,11 @@
   background: var(--coral);
 }
 
-/* chevron in the peeking strip: points left, "pull this out" */
+/* chevron in the peeking strip: points left, "pull this out". Kept on the left of the tab,
+   20px+ from the viewport edge, out of the scrollbar lane */
 .cube-tag-arrow {
   position: absolute;
-  left: 12px;
+  left: 13px;
   top: 50%;
   width: 10px;
   height: 10px;
